@@ -4,18 +4,17 @@ services:
     env: node
     buildCommand: cd backend && npm install
     startCommand: node backend/server.js
-    plan: free
     envVars:
       - key: NODE_ENV
         value: production
     autoDeploy: true
+    plan: free
 
   - type: web
     name: app-frontend
     env: static
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/build
-    plan: free
     routes:
       - type: rewrite
         source: /*
