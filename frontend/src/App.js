@@ -666,14 +666,14 @@ const Dashboard = () => {
   const destinations = [...new Set(vehicles.map(v => v.destination_station_code).filter(Boolean))];
   const origins = [...new Set(vehicles.map(v => v.origin_station_code).filter(Boolean))];
 
-  // Count vehicles by status
-/*  const counts = {
-  total: filteredVehicles.length,
-  scheduled: filteredVehicles.filter(v => getVehicleStatus(v) === 'programado').length,
-  waiting: filteredVehicles.filter(v => getVehicleStatus(v) === 'aguardando').length,
-  completed: filteredVehicles.filter(v => getVehicleStatus(v) === 'concluido').length
-};
-*/
+// Count vehicles by status
+  const counts = {
+    total: vehicles.length,
+    scheduled: vehicles.filter(v => v.status === 'programado' || getVehicleStatus(v) === 'programado').length,
+    waiting: vehicles.filter(v => v.status === 'aguardando' || getVehicleStatus(v) === 'aguardando').length,
+    completed: vehicles.filter(v => v.status === 'concluido' || getVehicleStatus(v) === 'concluido').length
+  };
+  
   // Handle search
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -734,26 +734,10 @@ if (selectedDate !== 'all') {
       );
     }
     
-/*    setFilteredVehicles(filtered);
+    setFilteredVehicles(filtered);
   }, [searchTerm, statusFilter, selectedDestination, selectedOrigin, selectedDate, vehicles]);
-*/
 
-setFilteredVehicles(filtered);
-
-  // Calcule os totais com base em filtered (lista filtrada)
-  const counts = {
-    total: filtered.length,
-    scheduled: filtered.filter(v => getVehicleStatus(v) === 'programado').length,
-    waiting: filtered.filter(v => getVehicleStatus(v) === 'aguardando').length,
-    completed: filtered.filter(v => getVehicleStatus(v) === 'concluido').length
-  };
-
-  // Atualize um estado para os totais, para usar no JSX
-  setCounts(counts);
-
-}, [searchTerm, statusFilter, selectedDestination, selectedOrigin, selectedDate, vehicles]);
-
-  
+ 
   // Função para buscar dados da API do backend
   const fetchVehicleData = async () => {
     try {
