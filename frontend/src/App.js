@@ -14,9 +14,6 @@ setDefaultLocale('pt-BR');
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
-const GOOGLE_SHEETS_API_KEY = process.env.REACT_APP_GOOGLE_SHEETS_API_KEY;
-const GOOGLE_SHEET_ID = process.env.REACT_APP_GOOGLE_SHEET_ID;
-const SHEET_NAME = process.env.REACT_APP_SHEET_NAME;
 
 // Default warehouse code - this would be dynamic in a full implementation
 const WAREHOUSE_CODE = "SOC-SP5";
@@ -383,7 +380,7 @@ const FilterButtons = ({
   
   // Parse date string to Date object
   const parseDateString = (dateString) => {
-    if (!dateString) return null;
+    if (!dateString || dateString === 'all') return null;
     // Handle different date formats (assuming DD/MM/YYYY)
     const parts = dateString.split('/');
     if (parts.length === 3) {
@@ -435,7 +432,7 @@ const FilterButtons = ({
           </label>
           <DatePicker
             id="date-picker"
-            selected={parseDateString(selectedDate !== 'all' ? selectedDate : '')}
+            selected={parseDateString(selectedDate)}
             onChange={date => {
               if (date) {
                 const formattedDate = format(date, 'dd/MM/yyyy');
@@ -647,6 +644,7 @@ const Dashboard = () => {
   const [language, setLanguage] = useState('pt'); // Default to Portuguese
   const [warehouseCode, setWarehouseCode] = useState(WAREHOUSE_CODE);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   // Get current date in DD/MM/YYYY format
   const today = new Date();
@@ -658,8 +656,8 @@ const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState(formattedToday);
   
   // Extract unique values for filters
-  const destinations = [...new Set(vehicles.map(v => v.destination_station_code))];
-  const origins = [...new Set(vehicles.map(v => v.origin_station_code))];
+  const destinations = [...new Set(vehicles.map(v => v.destination_station_code).filter(Boolean))];
+  const origins = [...new Set(vehicles.map(v => v.origin_station_code).filter(Boolean))];
 
   // Count vehicles by status
   const counts = {
@@ -720,130 +718,50 @@ const Dashboard = () => {
         (vehicle.license_plate?.toLowerCase().includes(term) || false) ||
         (vehicle.motorista?.toLowerCase().includes(term) || false) ||
         (vehicle.origin_station_code?.toLowerCase().includes(term) || false) ||
-        (vehicle.destination_station_code?.toLowerCase().includes(term) || false)
+        (vehicle.destination_station_code?.toLowerCase().includes(term) || false) ||
+        (vehicle.solicitation_by?.toLowerCase().includes(term) || false)
       );
     }
     
     setFilteredVehicles(filtered);
   }, [searchTerm, statusFilter, selectedDestination, selectedOrigin, selectedDate, vehicles]);
 
-  // Fetch data from Google Sheets API
-  const fetchGoogleSheetsData = async () => {
+  // Função para buscar dados da API do backend
+  const fetchVehicleData = async () => {
     try {
       setLoading(true);
-      console.log("Fetching data from Google Sheets API...");
+      setError(null);
       
-      // Construct the Google Sheets API URL
-      const sheetsUrl = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEET_ID}/values/${SHEET_NAME}?key=${GOOGLE_SHEETS_API_KEY}`;
+      // Chamada para o nosso backend que fará a ponte com o Google Sheets
+      console.log("Buscando dados da API:", `${API}/vehicles`);
+      const response = await axios.get(`${API}/vehicles`);
       
-      // Fetch the data
-      const response = await axios.get(sheetsUrl);
-      
-      // Check if we got valid data
-      if (response.data && response.data.values && response.data.values.length > 1) {
-        // Extract headers and data
-        const headers = response.data.values[0];
-        const rows = response.data.values.slice(1);
-        
-        // Map the data to our vehicle structure
-        const vehicles = rows.map(row => {
-          const vehicle = {};
-          
-          // Map each column based on its header
-          headers.forEach((header, index) => {
-            const value = row[index] || '';
-            
-            // Map headers to our vehicle property names
-            switch(header.toLowerCase().trim()) {
-              case 'trip_number':
-              case 'lt':
-                vehicle.trip_number = value;
-                break;
-              case 'solicitation_by':
-              case 'solicitação':
-                vehicle.solicitation_by = value;
-                break;
-              case 'planned_vehicle':
-              case 'veículo':
-                vehicle.planned_vehicle = value;
-                break;
-              case 'license_plate':
-              case 'placa':
-                vehicle.license_plate = value;
-                break;
-              case 'origin_station_code':
-              case 'origem':
-                vehicle.origin_station_code = value;
-                break;
-              case 'destination_station_code':
-              case 'destino':
-                vehicle.destination_station_code = value;
-                break;
-              case 'eta_destination_scheduled':
-              case 'eta programado':
-                vehicle.eta_destination_scheduled = value;
-                break;
-              case 'eta_destination_realized':
-              case 'eta realizado':
-                vehicle.eta_destination_realized = value;
-                break;
-              case 'horario_de_descarga':
-              case 'descarga':
-                vehicle.horario_de_descarga = value;
-                break;
-              case 'total_orders':
-              case 'pacotes':
-                vehicle.total_orders = value;
-                break;
-              case 'tempo_total':
-              case 'tempo total':
-                vehicle.tempo_total = value;
-                break;
-              case 'status':
-                vehicle.status = value.toLowerCase();
-                break;
-              case 'status_agrupado':
-              case 'status agrupado':
-                vehicle.status_agrupado = value;
-                break;
-              case 'data_referencia':
-              case 'data':
-                vehicle.data_referencia = value;
-                break;
-              case 'motorista':
-                vehicle.motorista = value;
-                break;
-              default:
-                // Handle any other columns
-                vehicle[header.toLowerCase().replace(/\s+/g, '_')] = value;
-            }
-          });
-          
-          return vehicle;
-        });
-        
-        // Update state with the fetched data
-        setVehicles(vehicles);
+      // Verificar se os dados são válidos
+      if (response.data && Array.isArray(response.data)) {
+        setVehicles(response.data);
+        console.log("Dados carregados com sucesso:", response.data.length, "veículos");
       } else {
-        console.error("Invalid data format from Google Sheets API");
-        // Fallback to sample data if API response is invalid
+        console.error("Formato de dados inválido da API");
+        // Em caso de erro, usamos os dados de exemplo
         setVehicles(sampleVehicles);
+        setError("Erro ao carregar dados: formato inválido");
       }
-      
-      setLoading(false);
     } catch (error) {
-      console.error("Error fetching Google Sheets data:", error);
-      // Fallback to sample data on error
+      console.error("Erro ao buscar dados da API:", error);
+      // Em caso de erro, usamos os dados de exemplo
       setVehicles(sampleVehicles);
+      setError(`Erro ao carregar dados: ${error.message}`);
+    } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchGoogleSheetsData();
+    // Buscar dados quando o componente for montado
+    fetchVehicleData();
     
-    // Set up periodic refresh (every 5 minutes)
-    const intervalId = setInterval(fetchGoogleSheetsData, 5 * 60 * 1000);
+    // Configurar atualização periódica (a cada 5 minutos)
+    const intervalId = setInterval(fetchVehicleData, 5 * 60 * 1000);
     
     return () => clearInterval(intervalId);
   }, []);
@@ -883,6 +801,21 @@ const Dashboard = () => {
               {loading ? (
                 <div className="flex justify-center items-center py-20">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                </div>
+              ) : error ? (
+                <div className="flex justify-center items-center py-20 flex-col">
+                  <div className="text-red-500 mb-4">
+                    <svg className="h-12 w-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </div>
+                  <p className="text-gray-700">{error}</p>
+                  <button 
+                    onClick={fetchVehicleData}
+                    className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                  >
+                    {language === 'pt' ? 'Tentar Novamente' : 'Try Again'}
+                  </button>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
