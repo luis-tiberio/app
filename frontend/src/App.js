@@ -12,7 +12,7 @@ import { format, parse } from 'date-fns';
 registerLocale('pt-BR', ptBR);
 setDefaultLocale('pt-BR');
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = "https://app-backend2-bdfg.onrender.com";
 const API = `${BACKEND_URL}/api`;
 
 // Default warehouse code - this would be dynamic in a full implementation
