@@ -17,7 +17,8 @@ const sampleVehicles = [
   {
     trip_number: "LT1O1600296B1",
     solicitation_by: "ANDERSON",
-    planned_vehicle: "GAQ8J07",
+    planned_vehicle: "CAMINHÃO",
+    license_plate: "GAQ8J07",
     origin_station_code: "SoC_SP_Campinas",
     destination_station_code: "SOC-SP3",
     eta_destination_scheduled: "06/01/2024 08:00",
@@ -25,14 +26,16 @@ const sampleVehicles = [
     horario_de_descarga: "",
     total_orders: "5",
     tempo_total: "00:27",
-    status: "waiting",
+    status: "aguardando",
+    status_agrupado: "ABERTA",
     data_referencia: "06/01/2024",
     motorista: "ANDERSON LEOPOLDINO"
   },
   {
     trip_number: "LT0O15000OI01",
     solicitation_by: "SHOPEE",
-    planned_vehicle: "GAQ8J07",
+    planned_vehicle: "CAMINHÃO",
+    license_plate: "GAQ8J07",
     origin_station_code: "SoC_SP_Campinas",
     destination_station_code: "SOC-SP3",
     eta_destination_scheduled: "05/01/2024 09:00",
@@ -40,36 +43,70 @@ const sampleVehicles = [
     horario_de_descarga: "",
     total_orders: "8",
     tempo_total: "00:16",
-    status: "waiting",
+    status: "aguardando",
+    status_agrupado: "ABERTA",
     data_referencia: "05/01/2024",
     motorista: "ANDERSON LEOPOLDINO"
+  },
+  {
+    trip_number: "LT0O3M00121D1",
+    solicitation_by: "SHOPEE",
+    planned_vehicle: "VAN",
+    license_plate: "DJB2I63",
+    origin_station_code: "SoC_SP_Campinas",
+    destination_station_code: "SOC-SP5",
+    eta_destination_scheduled: "22/03/2024 22:00",
+    eta_destination_realized: "22/03/2024 22:43",
+    horario_de_descarga: "22/03/2024 23:52",
+    total_orders: "12",
+    tempo_total: "01:52",
+    status: "concluído",
+    status_agrupado: "FECHADA",
+    data_referencia: "22/03/2024",
+    motorista: "Davi Luiz de Oliveira"
+  },
+  {
+    trip_number: "LT0NCN000NAB1",
+    solicitation_by: "FLEX",
+    planned_vehicle: "MOTO",
+    license_plate: "EXN5H91",
+    origin_station_code: "SoC_SP_Campinas",
+    destination_station_code: "SOC-SP3",
+    eta_destination_scheduled: "23/03/2024 10:00",
+    eta_destination_realized: "",
+    horario_de_descarga: "",
+    total_orders: "3",
+    tempo_total: "",
+    status: "programado",
+    status_agrupado: "NO SHOW",
+    data_referencia: "23/03/2024",
+    motorista: "WILLIAN PRADO SANCHES FELIX"
   }
 ];
 
 // Helper function to determine vehicle status
 const getVehicleStatus = (vehicle) => {
-  // This is a simplified status determination based on available fields
-  // In a real implementation, this would be more sophisticated
+  // This could be replaced with the status from the API if available
   if (!vehicle.eta_destination_realized) {
-    return "scheduled";
+    return "programado";
   } else if (vehicle.eta_destination_realized && !vehicle.horario_de_descarga) {
-    return "waiting";
+    return "aguardando";
   } else if (vehicle.horario_de_descarga) {
-    return "completed";
+    return "concluido";
   }
-  return vehicle.status || "unknown";
+  return vehicle.status || "desconhecido";
 };
 
 // Helper to get status color
 const getStatusColor = (status) => {
   switch (status) {
-    case "scheduled":
+    case "programado":
       return "bg-blue-100 text-blue-800";
-    case "waiting":
+    case "aguardando":
       return "bg-yellow-100 text-yellow-800";
-    case "unloading":
+    case "descarregando":
       return "bg-orange-100 text-orange-800";
-    case "completed":
+    case "concluido":
       return "bg-green-100 text-green-800";
     case "atrasado":
       return "bg-red-100 text-red-800";
@@ -79,24 +116,52 @@ const getStatusColor = (status) => {
 };
 
 // Status chip component
-const StatusChip = ({ status }) => {
-  // Translate status for display if needed
+const StatusChip = ({ status, language }) => {
+  // Translate status for display
   let displayStatus = status;
   const statusMap = {
-    "scheduled": "Programado",
-    "waiting": "Aguardando",
-    "unloading": "Descarregando",
-    "completed": "Concluído",
-    "atrasado": "Atrasado"
+    "pt": {
+      "programado": "Programado",
+      "aguardando": "Aguardando",
+      "descarregando": "Descarregando",
+      "concluido": "Concluído",
+      "atrasado": "Atrasado",
+      "desconhecido": "Desconhecido"
+    },
+    "en": {
+      "programado": "Scheduled",
+      "aguardando": "Waiting",
+      "descarregando": "Unloading",
+      "concluido": "Completed",
+      "atrasado": "Delayed",
+      "desconhecido": "Unknown"
+    }
   };
   
-  if (statusMap[status]) {
-    displayStatus = statusMap[status];
+  if (statusMap[language] && statusMap[language][status]) {
+    displayStatus = statusMap[language][status];
   }
   
   return (
     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(status)}`}>
       {displayStatus}
+    </span>
+  );
+};
+
+// Status Agrupado Chip
+const StatusAgrupadoChip = ({ statusAgrupado }) => {
+  // Define color schemes for each status
+  const colorMap = {
+    "ABERTA": "bg-green-100 text-green-800",
+    "FECHADA": "bg-blue-100 text-blue-800",
+    "NO SHOW": "bg-red-100 text-red-800",
+    "INFRUTÍFERA": "bg-yellow-100 text-yellow-800"
+  };
+  
+  return (
+    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${colorMap[statusAgrupado] || "bg-gray-100 text-gray-800"}`}>
+      {statusAgrupado}
     </span>
   );
 };
@@ -146,8 +211,9 @@ const DateTime = () => {
   });
   
   return (
-    <div className="text-sm text-gray-600">
-      {formattedDate} {formattedTime}
+    <div className="text-right text-sm text-gray-600">
+      <div>{formattedDate}</div>
+      <div>{formattedTime}</div>
     </div>
   );
 };
@@ -167,13 +233,15 @@ const Header = ({ language, setLanguage, warehouseCode }) => {
               className="h-10"
             />
             <div className="ml-4">
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-orange-500">
                 {title} - {warehouseCode}
               </h1>
-              <DateTime />
             </div>
           </div>
-          <LanguageToggle language={language} setLanguage={setLanguage} />
+          <div className="flex items-center space-x-4">
+            <DateTime />
+            <LanguageToggle language={language} setLanguage={setLanguage} />
+          </div>
         </div>
       </div>
     </div>
@@ -274,8 +342,91 @@ const DashboardStats = ({ counts, language }) => {
   );
 };
 
+// Filter Buttons Component
+const FilterButtons = ({ 
+  language, 
+  destinations,
+  origins,
+  dates,
+  selectedDestination,
+  selectedOrigin,
+  selectedDate,
+  setSelectedDestination,
+  setSelectedOrigin,
+  setSelectedDate
+}) => {
+  const labels = {
+    all: language === 'pt' ? 'Todos' : 'All',
+    destination: language === 'pt' ? 'Destino' : 'Destination',
+    origin: language === 'pt' ? 'Origem' : 'Origin',
+    date: language === 'pt' ? 'Data' : 'Date'
+  };
+  
+  return (
+    <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 sm:px-6">
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="flex items-center">
+          <label htmlFor="destination-select" className="mr-2 text-sm font-medium text-gray-700">
+            {labels.destination}:
+          </label>
+          <select
+            id="destination-select"
+            className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md"
+            value={selectedDestination}
+            onChange={(e) => setSelectedDestination(e.target.value)}
+          >
+            <option value="all">{labels.all}</option>
+            {destinations.map((dest) => (
+              <option key={dest} value={dest}>{dest}</option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="flex items-center">
+          <label htmlFor="origin-select" className="mr-2 text-sm font-medium text-gray-700">
+            {labels.origin}:
+          </label>
+          <select
+            id="origin-select"
+            className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md"
+            value={selectedOrigin}
+            onChange={(e) => setSelectedOrigin(e.target.value)}
+          >
+            <option value="all">{labels.all}</option>
+            {origins.map((origin) => (
+              <option key={origin} value={origin}>{origin}</option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="flex items-center">
+          <label htmlFor="date-select" className="mr-2 text-sm font-medium text-gray-700">
+            {labels.date}:
+          </label>
+          <select
+            id="date-select"
+            className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          >
+            <option value="all">{labels.all}</option>
+            {dates.map((date) => (
+              <option key={date} value={date}>{date}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Search and Filter Component
-const SearchAndFilter = ({ onSearchChange, onStatusFilterChange, selectedStatus, language }) => {
+const SearchAndFilter = ({ 
+  onSearchChange, 
+  onStatusFilterChange, 
+  selectedStatus,
+  language
+}) => {
   const labels = {
     vehicleList: language === 'pt' ? 'Lista de Veículos' : 'Vehicle List',
     search: language === 'pt' ? 'Pesquisar...' : 'Search...',
@@ -299,9 +450,9 @@ const SearchAndFilter = ({ onSearchChange, onStatusFilterChange, selectedStatus,
               value={selectedStatus}
             >
               <option value="all">{labels.allStatuses}</option>
-              <option value="scheduled">{labels.scheduled}</option>
-              <option value="waiting">{labels.waiting}</option>
-              <option value="completed">{labels.completed}</option>
+              <option value="programado">{labels.scheduled}</option>
+              <option value="aguardando">{labels.waiting}</option>
+              <option value="concluido">{labels.completed}</option>
             </select>
             <div className="relative rounded-md shadow-sm">
               <input
@@ -326,15 +477,20 @@ const SearchAndFilter = ({ onSearchChange, onStatusFilterChange, selectedStatus,
 // Vehicle Table Component
 const VehicleTable = ({ vehicles, language }) => {
   const headers = {
+    lt: language === 'pt' ? 'LT' : 'LT',
+    pacotes: language === 'pt' ? 'Pacotes' : 'Packages',
+    statusAgrupado: language === 'pt' ? 'Status Agrupado' : 'Grouped Status',
+    solicitacao: language === 'pt' ? 'Solicitação' : 'Solicitation',
+    destino: language === 'pt' ? 'Destino' : 'Destination',
+    origem: language === 'pt' ? 'Origem' : 'Origin', 
+    motorista: language === 'pt' ? 'Motorista' : 'Driver',
+    placa: language === 'pt' ? 'Placa' : 'License Plate',
+    veiculo: language === 'pt' ? 'Veículo' : 'Vehicle',
+    etaProgramado: language === 'pt' ? 'ETA Programado' : 'ETA Scheduled',
+    etaRealizado: language === 'pt' ? 'ETA Realizado' : 'ETA Realized',
+    descarga: language === 'pt' ? 'Descarga' : 'Unloading',
     status: language === 'pt' ? 'Status' : 'Status',
-    tripNumber: language === 'pt' ? 'LT' : 'Trip Number',
-    vehicleAndDriver: language === 'pt' ? 'Veículo & Motorista' : 'Vehicle & Driver',
-    arrivalTime: language === 'pt' ? 'ETA Realizado' : 'Actual Arrival',
-    origin: language === 'pt' ? 'Origem' : 'Origin',
-    destination: language === 'pt' ? 'Destino' : 'Destination',
-    unloadingTime: language === 'pt' ? 'Descarga' : 'Unloading Time',
-    packages: language === 'pt' ? 'Pacotes' : 'Packages',
-    totalTime: language === 'pt' ? 'Tempo Total' : 'Total Time'
+    tempoTotal: language === 'pt' ? 'Tempo Total' : 'Total Time'
   };
   
   return (
@@ -346,75 +502,92 @@ const VehicleTable = ({ vehicles, language }) => {
               <thead className="bg-gray-50">
                 <tr>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {headers.lt}
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {headers.pacotes}
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {headers.statusAgrupado}
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {headers.solicitacao}
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {headers.destino}
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {headers.origem}
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {headers.motorista}
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {headers.placa}
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {headers.veiculo}
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {headers.etaProgramado}
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {headers.etaRealizado}
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {headers.descarga}
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {headers.status}
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.tripNumber}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.vehicleAndDriver}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.arrivalTime}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.origin}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.destination}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.unloadingTime}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.packages}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.totalTime}
+                    {headers.tempoTotal}
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {vehicles.map((vehicle) => {
-                  const status = getVehicleStatus(vehicle);
+                  const status = vehicle.status || getVehicleStatus(vehicle);
                   return (
                     <tr key={vehicle.trip_number} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <StatusChip status={status} />
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {vehicle.trip_number}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{vehicle.planned_vehicle}</div>
-                            <div className="text-sm text-gray-500">{vehicle.motorista}</div>
-                          </div>
-                        </div>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {vehicle.total_orders || '0'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {vehicle.eta_destination_realized || language === 'pt' ? 'Não chegou' : 'Not arrived'}
-                        </div>
-                        {vehicle.eta_destination_scheduled && (
-                          <div className="text-sm text-gray-500">
-                            {language === 'pt' ? 'Programado: ' : 'Scheduled: '}
-                            {vehicle.eta_destination_scheduled}
-                          </div>
-                        )}
+                        <StatusAgrupadoChip statusAgrupado={vehicle.status_agrupado} />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {vehicle.origin_station_code}
+                        {vehicle.solicitation_by}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {vehicle.destination_station_code}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {vehicle.horario_de_descarga || '-'}
+                        {vehicle.origin_station_code}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {vehicle.total_orders || '0'}
+                        {vehicle.motorista}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {vehicle.license_plate}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {vehicle.planned_vehicle}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {vehicle.eta_destination_scheduled || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {vehicle.eta_destination_realized || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {vehicle.horario_de_descarga || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <StatusChip status={status} language={language} />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {vehicle.tempo_total || '-'}
@@ -440,13 +613,23 @@ const Dashboard = () => {
   const [language, setLanguage] = useState('pt'); // Default to Portuguese
   const [warehouseCode, setWarehouseCode] = useState(WAREHOUSE_CODE);
   const [loading, setLoading] = useState(true);
+  
+  // Additional filters
+  const [selectedDestination, setSelectedDestination] = useState('all');
+  const [selectedOrigin, setSelectedOrigin] = useState('all');
+  const [selectedDate, setSelectedDate] = useState('all');
+  
+  // Extract unique values for filters
+  const destinations = [...new Set(vehicles.map(v => v.destination_station_code))];
+  const origins = [...new Set(vehicles.map(v => v.origin_station_code))];
+  const dates = [...new Set(vehicles.map(v => v.data_referencia))];
 
   // Count vehicles by status
   const counts = {
     total: vehicles.length,
-    scheduled: vehicles.filter(v => getVehicleStatus(v) === 'scheduled').length,
-    waiting: vehicles.filter(v => getVehicleStatus(v) === 'waiting').length,
-    completed: vehicles.filter(v => getVehicleStatus(v) === 'completed').length
+    scheduled: vehicles.filter(v => v.status === 'programado' || getVehicleStatus(v) === 'programado').length,
+    waiting: vehicles.filter(v => v.status === 'aguardando' || getVehicleStatus(v) === 'aguardando').length,
+    completed: vehicles.filter(v => v.status === 'concluido' || getVehicleStatus(v) === 'concluido').length
   };
 
   // Handle search
@@ -459,13 +642,36 @@ const Dashboard = () => {
     setStatusFilter(e.target.value);
   };
 
-  // Apply filters
+  // Apply all filters
   useEffect(() => {
     let filtered = vehicles;
     
     // Apply status filter
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(vehicle => getVehicleStatus(vehicle) === statusFilter);
+      filtered = filtered.filter(vehicle => 
+        vehicle.status === statusFilter || getVehicleStatus(vehicle) === statusFilter
+      );
+    }
+    
+    // Apply destination filter
+    if (selectedDestination !== 'all') {
+      filtered = filtered.filter(vehicle => 
+        vehicle.destination_station_code === selectedDestination
+      );
+    }
+    
+    // Apply origin filter
+    if (selectedOrigin !== 'all') {
+      filtered = filtered.filter(vehicle => 
+        vehicle.origin_station_code === selectedOrigin
+      );
+    }
+    
+    // Apply date filter
+    if (selectedDate !== 'all') {
+      filtered = filtered.filter(vehicle => 
+        vehicle.data_referencia === selectedDate
+      );
     }
     
     // Apply search filter
@@ -474,6 +680,7 @@ const Dashboard = () => {
       filtered = filtered.filter(vehicle => 
         (vehicle.trip_number?.toLowerCase().includes(term) || false) ||
         (vehicle.planned_vehicle?.toLowerCase().includes(term) || false) ||
+        (vehicle.license_plate?.toLowerCase().includes(term) || false) ||
         (vehicle.motorista?.toLowerCase().includes(term) || false) ||
         (vehicle.origin_station_code?.toLowerCase().includes(term) || false) ||
         (vehicle.destination_station_code?.toLowerCase().includes(term) || false)
@@ -481,36 +688,116 @@ const Dashboard = () => {
     }
     
     setFilteredVehicles(filtered);
-  }, [searchTerm, statusFilter, vehicles]);
+  }, [searchTerm, statusFilter, selectedDestination, selectedOrigin, selectedDate, vehicles]);
 
   // Fetch data from Google Sheets API
   const fetchGoogleSheetsData = async () => {
     try {
       setLoading(true);
-      // In a production app, this API call would be proxied through the backend for security
-      // For now, we're simulating the data load
       console.log("Fetching data from Google Sheets API...");
       
-      // Here we would make the actual API call to Google Sheets
-      // const response = await axios.get(
-      //   `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEET_ID}/values/${SHEET_NAME}?key=${GOOGLE_SHEETS_API_KEY}`
-      // );
+      // Construct the Google Sheets API URL
+      const sheetsUrl = `https://sheets.googleapis.com/v4/spreadsheets/${GOOGLE_SHEET_ID}/values/${SHEET_NAME}?key=${GOOGLE_SHEETS_API_KEY}`;
       
-      // Process the data from Google Sheets
-      // const data = response.data.values;
-      // const headers = data[0];
-      // const rows = data.slice(1);
+      // Fetch the data
+      const response = await axios.get(sheetsUrl);
       
-      // In a real implementation, we would parse the Google Sheets data
-      // and transform it into our vehicle data structure
-      
-      // For now, we'll just use our sample data
-      setTimeout(() => {
+      // Check if we got valid data
+      if (response.data && response.data.values && response.data.values.length > 1) {
+        // Extract headers and data
+        const headers = response.data.values[0];
+        const rows = response.data.values.slice(1);
+        
+        // Map the data to our vehicle structure
+        const vehicles = rows.map(row => {
+          const vehicle = {};
+          
+          // Map each column based on its header
+          headers.forEach((header, index) => {
+            const value = row[index] || '';
+            
+            // Map headers to our vehicle property names
+            switch(header.toLowerCase()) {
+              case 'trip_number':
+              case 'lt':
+                vehicle.trip_number = value;
+                break;
+              case 'solicitation_by':
+              case 'solicitação':
+                vehicle.solicitation_by = value;
+                break;
+              case 'planned_vehicle':
+              case 'veículo':
+                vehicle.planned_vehicle = value;
+                break;
+              case 'license_plate':
+              case 'placa':
+                vehicle.license_plate = value;
+                break;
+              case 'origin_station_code':
+              case 'origem':
+                vehicle.origin_station_code = value;
+                break;
+              case 'destination_station_code':
+              case 'destino':
+                vehicle.destination_station_code = value;
+                break;
+              case 'eta_destination_scheduled':
+              case 'eta programado':
+                vehicle.eta_destination_scheduled = value;
+                break;
+              case 'eta_destination_realized':
+              case 'eta realizado':
+                vehicle.eta_destination_realized = value;
+                break;
+              case 'horario_de_descarga':
+              case 'descarga':
+                vehicle.horario_de_descarga = value;
+                break;
+              case 'total_orders':
+              case 'pacotes':
+                vehicle.total_orders = value;
+                break;
+              case 'tempo_total':
+              case 'tempo total':
+                vehicle.tempo_total = value;
+                break;
+              case 'status':
+                vehicle.status = value.toLowerCase();
+                break;
+              case 'status_agrupado':
+              case 'status agrupado':
+                vehicle.status_agrupado = value;
+                break;
+              case 'data_referencia':
+              case 'data':
+                vehicle.data_referencia = value;
+                break;
+              case 'motorista':
+                vehicle.motorista = value;
+                break;
+              default:
+                // Handle any other columns
+                vehicle[header.toLowerCase().replace(/\s+/g, '_')] = value;
+            }
+          });
+          
+          return vehicle;
+        });
+        
+        // Update state with the fetched data
+        setVehicles(vehicles);
+      } else {
+        console.error("Invalid data format from Google Sheets API");
+        // Fallback to sample data if API response is invalid
         setVehicles(sampleVehicles);
-        setLoading(false);
-      }, 1000);
+      }
+      
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching Google Sheets data:", error);
+      // Fallback to sample data on error
+      setVehicles(sampleVehicles);
       setLoading(false);
     }
   };
@@ -542,6 +829,19 @@ const Dashboard = () => {
                 onStatusFilterChange={handleStatusFilterChange}
                 selectedStatus={statusFilter}
                 language={language}
+              />
+              
+              <FilterButtons 
+                language={language}
+                destinations={destinations}
+                origins={origins}
+                dates={dates}
+                selectedDestination={selectedDestination}
+                selectedOrigin={selectedOrigin}
+                selectedDate={selectedDate}
+                setSelectedDestination={setSelectedDestination}
+                setSelectedOrigin={setSelectedOrigin}
+                setSelectedDate={setSelectedDate}
               />
               
               {loading ? (

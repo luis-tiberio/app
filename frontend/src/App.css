@@ -52,22 +52,22 @@
   font-weight: 600;
 }
 
-.status-scheduled {
+.status-programado {
   background-color: #DBEAFE;
   color: #1E40AF;
 }
 
-.status-waiting {
+.status-aguardando {
   background-color: #FEF3C7;
   color: #92400E;
 }
 
-.status-unloading {
+.status-descarregando {
   background-color: #FFEDD5;
   color: #9A3412;
 }
 
-.status-completed {
+.status-concluido {
   background-color: #D1FAE5;
   color: #065F46;
 }
@@ -75,6 +75,27 @@
 .status-atrasado {
   background-color: #FEE2E2;
   color: #B91C1C;
+}
+
+/* Status Agrupado badges */
+.status-aberta {
+  background-color: #D1FAE5;
+  color: #065F46;
+}
+
+.status-fechada {
+  background-color: #DBEAFE;
+  color: #1E40AF;
+}
+
+.status-no-show {
+  background-color: #FEE2E2;
+  color: #B91C1C;
+}
+
+.status-infrutifera {
+  background-color: #FEF3C7;
+  color: #92400E;
 }
 
 /* ShopeeXPRESS branded elements */
@@ -128,5 +149,6 @@
 
 .warehouse-title {
   font-weight: 700;
-  color: #111827;
+  color: var(--shopee-orange);
+  font-size: 1.5rem;
 }
