@@ -1,16 +1,17 @@
+/* ShopeeXPRESS theme colors */
+:root {
+  --shopee-orange: #ee4d2d;
+  --shopee-light-orange: #ff6633;
+  --shopee-dark-orange: #d94026;
+}
+
 /* Global app styles */
 .App {
   text-align: center;
 }
 
-/* Adjust the styling to work with Tailwind */
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-@keyframes App-logo-spin {
+/* Animation for loading spinner */
+@keyframes spin {
   from {
     transform: rotate(0deg);
   }
@@ -19,7 +20,11 @@
   }
 }
 
-/* Override Tailwind styles for specific elements if needed */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Custom scrollbar styles */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -30,19 +35,15 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #888;
+  background: var(--shopee-orange);
   border-radius: 2px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--shopee-dark-orange);
 }
 
-/* Additional custom styles */
-.table-fixed {
-  table-layout: fixed;
-}
-
+/* Status badges */
 .status-badge {
   display: inline-block;
   border-radius: 9999px;
@@ -69,4 +70,63 @@
 .status-completed {
   background-color: #D1FAE5;
   color: #065F46;
+}
+
+.status-atrasado {
+  background-color: #FEE2E2;
+  color: #B91C1C;
+}
+
+/* ShopeeXPRESS branded elements */
+.bg-shopee-orange {
+  background-color: var(--shopee-orange);
+}
+
+.text-shopee-orange {
+  color: var(--shopee-orange);
+}
+
+.border-shopee-orange {
+  border-color: var(--shopee-orange);
+}
+
+.focus\:ring-shopee-orange:focus {
+  --tw-ring-color: var(--shopee-orange);
+}
+
+.focus\:border-shopee-orange:focus {
+  border-color: var(--shopee-orange);
+}
+
+/* Table styles */
+.table-container {
+  overflow-x: auto;
+}
+
+.table-header {
+  background-color: #F9FAFB;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.row-hover:hover {
+  background-color: #F9FAFB;
+  transition: background-color 0.2s;
+}
+
+/* Header and logo styles */
+.header-logo {
+  height: 40px;
+  width: auto;
+}
+
+.header-container {
+  background-color: white;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.warehouse-title {
+  font-weight: 700;
+  color: #111827;
 }
