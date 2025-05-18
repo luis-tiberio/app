@@ -8,6 +8,13 @@ import { registerLocale, setDefaultLocale } from "react-datepicker";
 import { ptBR } from 'date-fns/locale/pt-BR';
 import { format, parse } from 'date-fns';
 
+// Data alterada
+function parseDateBR(dateStr) {
+  if (!dateStr) return null;
+  const [day, month, year] = dateStr.split('/');
+  return new Date(year, month - 1, day);
+}
+
 // Registrando o locale pt-BR para o DatePicker
 registerLocale('pt-BR', ptBR);
 setDefaultLocale('pt-BR');
@@ -703,11 +710,15 @@ const Dashboard = () => {
     }
     
     // Apply date filter
-    if (selectedDate !== 'all') {
-      filtered = filtered.filter(vehicle => 
-        vehicle.data_referencia === selectedDate
-      );
-    }
+if (selectedDate !== 'all') {
+  filtered = filtered.filter(vehicle => {
+    const itemDate = parseDateBR(vehicle.data_referencia);
+    const selected = parseDateBR(selectedDate);
+    if (!itemDate || !selected) return false;
+    return itemDate.toDateString() === selected.toDateString();
+  });
+}
+
     
     // Apply search filter
     if (searchTerm) {
