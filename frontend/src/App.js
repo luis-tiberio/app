@@ -30,7 +30,7 @@ const sampleVehicles = [
   {
     trip_number: "LT1O1600296B1",
     solicitation_by: "ANDERSON",
-    planned_vehicle: "CAMINHÃO",
+    planned_vehicle: "CAMINHÃƒO",
     license_plate: "GAQ8J07",
     origin_station_code: "SoC_SP_Campinas",
     destination_station_code: "SOC-SP3",
@@ -47,7 +47,7 @@ const sampleVehicles = [
   {
     trip_number: "LT0O15000OI01",
     solicitation_by: "SHOPEE",
-    planned_vehicle: "CAMINHÃO",
+    planned_vehicle: "CAMINHÃƒO",
     license_plate: "GAQ8J07",
     origin_station_code: "SoC_SP_Campinas",
     destination_station_code: "SOC-SP3",
@@ -143,11 +143,11 @@ const StatusChip = ({ status, language }) => {
       "programado": "Programado",
       "aguardando": "Aguardando",
       "descarregando": "Descarregando",
-      "concluido": "Concluído",
+      "concluido": "ConcluÃ­do",
       "atrasado": "Atrasado",
       "desconhecido": "Desconhecido",
-      "no_show": "Não Compareceu",
-      "infrutifera": "Infrutífera"
+      "no_show": "NÃ£o Compareceu",
+      "infrutifera": "InfrutÃ­fera"
     },
     "en": {
       "programado": "Scheduled",
@@ -179,7 +179,7 @@ const StatusAgrupadoChip = ({ statusAgrupado }) => {
     "ABERTA": "bg-green-100 text-green-800",
     "FECHADA": "bg-blue-100 text-blue-800",
     "NO SHOW": "bg-red-100 text-red-800",
-    "INFRUTÍFERA": "bg-yellow-100 text-yellow-800"
+    "INFRUTÃFERA": "bg-yellow-100 text-yellow-800"
   };
   
   return (
@@ -209,7 +209,7 @@ const LanguageToggle = ({ language, setLanguage }) => {
   );
 };
 
-// DateTime Component using São Paulo timezone
+// DateTime Component using SÃ£o Paulo timezone
 const DateTime = () => {
   const [dateTime, setDateTime] = useState(new Date());
   
@@ -221,7 +221,7 @@ const DateTime = () => {
     return () => clearInterval(timer);
   }, []);
   
-  // Format date and time according to São Paulo/Brazil locale
+  // Format date and time according to SÃ£o Paulo/Brazil locale
   const formattedDate = dateTime.toLocaleDateString('pt-BR', { 
     timeZone: 'America/Sao_Paulo' 
   });
@@ -274,10 +274,10 @@ const Header = ({ language, setLanguage, warehouseCode }) => {
 // Dashboard Stats Component
 const DashboardStats = ({ counts, language }) => {
   const labels = {
-    total: language === 'pt' ? 'Total de Veículos' : 'Total Vehicles',
+    total: language === 'pt' ? 'Total de VeÃ­culos' : 'Total Vehicles',
     scheduled: language === 'pt' ? 'Programados' : 'Scheduled',
     waiting: language === 'pt' ? 'Aguardando' : 'Waiting',
-    completed: language === 'pt' ? 'Concluídos' : 'Completed'
+    completed: language === 'pt' ? 'ConcluÃ­dos' : 'Completed'
   };
   
   return (
@@ -468,12 +468,12 @@ const SearchAndFilter = ({
   language
 }) => {
   const labels = {
-    vehicleList: language === 'pt' ? 'Lista de Veículos' : 'Vehicle List',
+    vehicleList: language === 'pt' ? 'Lista de VeÃ­culos' : 'Vehicle List',
     search: language === 'pt' ? 'Pesquisar...' : 'Search...',
     allStatuses: language === 'pt' ? 'Todos os Status' : 'All Statuses',
     scheduled: language === 'pt' ? 'Programados' : 'Scheduled',
     waiting: language === 'pt' ? 'Aguardando' : 'Waiting',
-    completed: language === 'pt' ? 'Concluídos' : 'Completed'
+    completed: language === 'pt' ? 'ConcluÃ­dos' : 'Completed'
   };
   
   return (
@@ -520,12 +520,12 @@ const VehicleTable = ({ vehicles, language }) => {
     lt: language === 'pt' ? 'LT' : 'LT',
     pacotes: language === 'pt' ? 'Pacotes' : 'Packages',
     statusAgrupado: language === 'pt' ? 'Status Agrupado' : 'Grouped Status',
-    solicitacao: language === 'pt' ? 'Solicitação' : 'Solicitation',
+    solicitacao: language === 'pt' ? 'SolicitaÃ§Ã£o' : 'Solicitation',
     destino: language === 'pt' ? 'Destino' : 'Destination',
     origem: language === 'pt' ? 'Origem' : 'Origin', 
     motorista: language === 'pt' ? 'Motorista' : 'Driver',
     placa: language === 'pt' ? 'Placa' : 'License Plate',
-    veiculo: language === 'pt' ? 'Veículo' : 'Vehicle',
+    veiculo: language === 'pt' ? 'VeÃ­culo' : 'Vehicle',
     etaProgramado: language === 'pt' ? 'ETA Programado' : 'ETA Scheduled',
     etaRealizado: language === 'pt' ? 'ETA Realizado' : 'ETA Realized',
     descarga: language === 'pt' ? 'Descarga' : 'Unloading',
@@ -666,14 +666,14 @@ const Dashboard = () => {
   const destinations = [...new Set(vehicles.map(v => v.destination_station_code).filter(Boolean))];
   const origins = [...new Set(vehicles.map(v => v.origin_station_code).filter(Boolean))];
 
-// Count vehicles by status
+  // Count vehicles by status
   const counts = {
     total: vehicles.length,
     scheduled: vehicles.filter(v => v.status === 'programado' || getVehicleStatus(v) === 'programado').length,
     waiting: vehicles.filter(v => v.status === 'aguardando' || getVehicleStatus(v) === 'aguardando').length,
     completed: vehicles.filter(v => v.status === 'concluido' || getVehicleStatus(v) === 'concluido').length
   };
-  
+
   // Handle search
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -737,26 +737,25 @@ if (selectedDate !== 'all') {
     setFilteredVehicles(filtered);
   }, [searchTerm, statusFilter, selectedDestination, selectedOrigin, selectedDate, vehicles]);
 
- 
-  // Função para buscar dados da API do backend
+  // FunÃ§Ã£o para buscar dados da API do backend
   const fetchVehicleData = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // Chamada para o nosso backend que fará a ponte com o Google Sheets
+      // Chamada para o nosso backend que farÃ¡ a ponte com o Google Sheets
       console.log("Buscando dados da API:", `${API}/vehicles`);
       const response = await axios.get(`${API}/vehicles`);
       
-      // Verificar se os dados são válidos
+      // Verificar se os dados sÃ£o vÃ¡lidos
       if (response.data && Array.isArray(response.data)) {
         setVehicles(response.data);
-        console.log("Dados carregados com sucesso:", response.data.length, "veículos");
+        console.log("Dados carregados com sucesso:", response.data.length, "veÃ­culos");
       } else {
-        console.error("Formato de dados inválido da API");
+        console.error("Formato de dados invÃ¡lido da API");
         // Em caso de erro, usamos os dados de exemplo
         setVehicles(sampleVehicles);
-        setError("Erro ao carregar dados: formato inválido");
+        setError("Erro ao carregar dados: formato invÃ¡lido");
       }
     } catch (error) {
       console.error("Erro ao buscar dados da API:", error);
@@ -772,7 +771,7 @@ if (selectedDate !== 'all') {
     // Buscar dados quando o componente for montado
     fetchVehicleData();
     
-    // Configurar atualização periódica (a cada 5 minutos)
+    // Configurar atualizaÃ§Ã£o periÃ³dica (a cada 5 minutos)
     const intervalId = setInterval(fetchVehicleData, 5 * 60 * 1000);
     
     return () => clearInterval(intervalId);
