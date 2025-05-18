@@ -2,6 +2,15 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import axios from "axios";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { registerLocale, setDefaultLocale } from "react-datepicker";
+import { ptBR } from 'date-fns/locale/pt-BR';
+import { format, parse } from 'date-fns';
+
+// Registrando o locale pt-BR para o DatePicker
+registerLocale('pt-BR', ptBR);
+setDefaultLocale('pt-BR');
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -60,7 +69,7 @@ const sampleVehicles = [
     horario_de_descarga: "22/03/2024 23:52",
     total_orders: "12",
     tempo_total: "01:52",
-    status: "concluído",
+    status: "concluido",
     status_agrupado: "FECHADA",
     data_referencia: "22/03/2024",
     motorista: "Davi Luiz de Oliveira"
@@ -110,6 +119,12 @@ const getStatusColor = (status) => {
       return "bg-green-100 text-green-800";
     case "atrasado":
       return "bg-red-100 text-red-800";
+    case "desconhecido":
+      return "bg-gray-100 text-gray-800";
+    case "no_show":
+      return "bg-red-100 text-red-800";
+    case "infrutifera":
+      return "bg-yellow-100 text-yellow-800";
     default:
       return "bg-gray-100 text-gray-800";
   }
@@ -126,7 +141,9 @@ const StatusChip = ({ status, language }) => {
       "descarregando": "Descarregando",
       "concluido": "Concluído",
       "atrasado": "Atrasado",
-      "desconhecido": "Desconhecido"
+      "desconhecido": "Desconhecido",
+      "no_show": "Não Compareceu",
+      "infrutifera": "Infrutífera"
     },
     "en": {
       "programado": "Scheduled",
@@ -134,7 +151,9 @@ const StatusChip = ({ status, language }) => {
       "descarregando": "Unloading",
       "concluido": "Completed",
       "atrasado": "Delayed",
-      "desconhecido": "Unknown"
+      "desconhecido": "Unknown",
+      "no_show": "No Show",
+      "infrutifera": "Unproductive"
     }
   };
   
@@ -347,21 +366,32 @@ const FilterButtons = ({
   language, 
   destinations,
   origins,
-  dates,
+  selectedDate,
+  setSelectedDate,
   selectedDestination,
   selectedOrigin,
-  selectedDate,
   setSelectedDestination,
-  setSelectedOrigin,
-  setSelectedDate
+  setSelectedOrigin
 }) => {
   const labels = {
     all: language === 'pt' ? 'Todos' : 'All',
     destination: language === 'pt' ? 'Destino' : 'Destination',
     origin: language === 'pt' ? 'Origem' : 'Origin',
-    date: language === 'pt' ? 'Data' : 'Date'
+    date: language === 'pt' ? 'Data' : 'Date',
+    selectDate: language === 'pt' ? 'Selecionar data' : 'Select date'
   };
   
+  // Parse date string to Date object
+  const parseDateString = (dateString) => {
+    if (!dateString) return null;
+    // Handle different date formats (assuming DD/MM/YYYY)
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+      return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+    return null;
+  };
+
   return (
     <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 sm:px-6">
       <div className="flex flex-wrap gap-3 items-center">
@@ -400,20 +430,26 @@ const FilterButtons = ({
         </div>
         
         <div className="flex items-center">
-          <label htmlFor="date-select" className="mr-2 text-sm font-medium text-gray-700">
+          <label htmlFor="date-picker" className="mr-2 text-sm font-medium text-gray-700">
             {labels.date}:
           </label>
-          <select
-            id="date-select"
+          <DatePicker
+            id="date-picker"
+            selected={parseDateString(selectedDate !== 'all' ? selectedDate : '')}
+            onChange={date => {
+              if (date) {
+                const formattedDate = format(date, 'dd/MM/yyyy');
+                setSelectedDate(formattedDate);
+              } else {
+                setSelectedDate('all');
+              }
+            }}
+            dateFormat="dd/MM/yyyy"
+            locale="pt-BR"
+            isClearable
+            placeholderText={labels.selectDate}
             className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          >
-            <option value="all">{labels.all}</option>
-            {dates.map((date) => (
-              <option key={date} value={date}>{date}</option>
-            ))}
-          </select>
+          />
         </div>
       </div>
     </div>
@@ -494,112 +530,110 @@ const VehicleTable = ({ vehicles, language }) => {
   };
   
   return (
-    <div className="flex flex-col">
-      <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-          <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.lt}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.pacotes}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.statusAgrupado}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.solicitacao}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.destino}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.origem}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.motorista}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.placa}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.veiculo}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.etaProgramado}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.etaRealizado}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.descarga}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.status}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {headers.tempoTotal}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {vehicles.map((vehicle) => {
-                  const status = vehicle.status || getVehicleStatus(vehicle);
-                  return (
-                    <tr key={vehicle.trip_number} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {vehicle.trip_number}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {vehicle.total_orders || '0'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <StatusAgrupadoChip statusAgrupado={vehicle.status_agrupado} />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {vehicle.solicitation_by}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {vehicle.destination_station_code}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {vehicle.origin_station_code}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {vehicle.motorista}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {vehicle.license_plate}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {vehicle.planned_vehicle}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {vehicle.eta_destination_scheduled || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {vehicle.eta_destination_realized || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {vehicle.horario_de_descarga || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <StatusChip status={status} language={language} />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {vehicle.tempo_total || '-'}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200 table-auto">
+        <thead className="bg-gray-50">
+          <tr>
+            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {headers.lt}
+            </th>
+            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {headers.pacotes}
+            </th>
+            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {headers.statusAgrupado}
+            </th>
+            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {headers.solicitacao}
+            </th>
+            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {headers.destino}
+            </th>
+            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {headers.origem}
+            </th>
+            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {headers.motorista}
+            </th>
+            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {headers.placa}
+            </th>
+            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {headers.veiculo}
+            </th>
+            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {headers.etaProgramado}
+            </th>
+            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {headers.etaRealizado}
+            </th>
+            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {headers.descarga}
+            </th>
+            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {headers.status}
+            </th>
+            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {headers.tempoTotal}
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {vehicles.map((vehicle) => {
+            const status = vehicle.status || getVehicleStatus(vehicle);
+            return (
+              <tr key={vehicle.trip_number} className="hover:bg-gray-50">
+                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">
+                  {vehicle.trip_number}
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                  {vehicle.total_orders || '0'}
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-center">
+                  <div className="flex justify-center">
+                    <StatusAgrupadoChip statusAgrupado={vehicle.status_agrupado} />
+                  </div>
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                  {vehicle.solicitation_by}
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                  {vehicle.destination_station_code}
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                  {vehicle.origin_station_code}
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                  {vehicle.motorista}
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                  {vehicle.license_plate}
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                  {vehicle.planned_vehicle}
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                  {vehicle.eta_destination_scheduled || '-'}
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                  {vehicle.eta_destination_realized || '-'}
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                  {vehicle.horario_de_descarga || '-'}
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-center">
+                  <div className="flex justify-center">
+                    <StatusChip status={status} language={language} />
+                  </div>
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                  {vehicle.tempo_total || '-'}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 };
@@ -614,15 +648,18 @@ const Dashboard = () => {
   const [warehouseCode, setWarehouseCode] = useState(WAREHOUSE_CODE);
   const [loading, setLoading] = useState(true);
   
+  // Get current date in DD/MM/YYYY format
+  const today = new Date();
+  const formattedToday = format(today, 'dd/MM/yyyy');
+  
   // Additional filters
   const [selectedDestination, setSelectedDestination] = useState('all');
   const [selectedOrigin, setSelectedOrigin] = useState('all');
-  const [selectedDate, setSelectedDate] = useState('all');
+  const [selectedDate, setSelectedDate] = useState(formattedToday);
   
   // Extract unique values for filters
   const destinations = [...new Set(vehicles.map(v => v.destination_station_code))];
   const origins = [...new Set(vehicles.map(v => v.origin_station_code))];
-  const dates = [...new Set(vehicles.map(v => v.data_referencia))];
 
   // Count vehicles by status
   const counts = {
@@ -717,7 +754,7 @@ const Dashboard = () => {
             const value = row[index] || '';
             
             // Map headers to our vehicle property names
-            switch(header.toLowerCase()) {
+            switch(header.toLowerCase().trim()) {
               case 'trip_number':
               case 'lt':
                 vehicle.trip_number = value;
@@ -835,13 +872,12 @@ const Dashboard = () => {
                 language={language}
                 destinations={destinations}
                 origins={origins}
-                dates={dates}
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
                 selectedDestination={selectedDestination}
                 selectedOrigin={selectedOrigin}
-                selectedDate={selectedDate}
                 setSelectedDestination={setSelectedDestination}
                 setSelectedOrigin={setSelectedOrigin}
-                setSelectedDate={setSelectedDate}
               />
               
               {loading ? (
@@ -849,10 +885,12 @@ const Dashboard = () => {
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
                 </div>
               ) : (
-                <VehicleTable 
-                  vehicles={filteredVehicles}
-                  language={language}
-                />
+                <div className="overflow-x-auto">
+                  <VehicleTable 
+                    vehicles={filteredVehicles}
+                    language={language}
+                  />
+                </div>
               )}
             </div>
           </div>
