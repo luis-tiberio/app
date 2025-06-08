@@ -166,6 +166,12 @@ const StatusChip = ({ status, language }) => {
       no_show: "Não Compareceu",
       infrutifera: "Infrutífera",
       cancelado: "Cancelado",
+      no_prazo: "No Prazo",
+      em_transito: "Em Trânsito",
+      chegou: "Chegou",
+      saiu: "Saiu",
+      carregando: "Carregando",
+      finalizado: "Finalizado",
     },
     en: {
       programado: "Scheduled",
@@ -177,16 +183,28 @@ const StatusChip = ({ status, language }) => {
       no_show: "No Show",
       infrutifera: "Unproductive",
       cancelado: "Canceled",
+      no_prazo: "On Time",
+      em_transito: "In Transit",
+      chegou: "Arrived",
+      saiu: "Departed",
+      carregando: "Loading",
+      finalizado: "Finished",
     },
   };
 
-  if (statusMap[language] && statusMap[language][status]) {
+  // Normalize status for lookup (remove spaces, convert to lowercase)
+  const normalizedStatus = status?.toLowerCase().replace(/\s+/g, "_");
+
+  // Get translated text
+  if (statusMap[language] && statusMap[language][normalizedStatus]) {
+    displayStatus = statusMap[language][normalizedStatus];
+  } else if (statusMap[language] && statusMap[language][status]) {
     displayStatus = statusMap[language][status];
   }
 
   return (
     <span
-      className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(status)}`}
+      className={`status-chip px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(status)}`}
     >
       {displayStatus}
     </span>
@@ -258,7 +276,7 @@ const StatusAgrupadoChip = ({ statusAgrupado, language }) => {
 
   return (
     <span
-      className={`px-2 py-1 rounded-full text-xs font-semibold ${colorMap[statusAgrupado] || "bg-gray-100 text-gray-800"}`}
+      className={`status-chip px-2 py-1 rounded-full text-xs font-semibold ${colorMap[statusAgrupado] || "bg-gray-100 text-gray-800"}`}
     >
       {translatedStatus}
     </span>
@@ -533,6 +551,8 @@ const FilterButtons = ({
   selectedOrigin,
   setSelectedDestination,
   setSelectedOrigin,
+  isTableFitToScreen,
+  setIsTableFitToScreen,
 }) => {
   const labels = {
     all: language === "pt" ? "Todos" : "All",
@@ -540,6 +560,8 @@ const FilterButtons = ({
     origin: language === "pt" ? "Origem" : "Origin",
     date: language === "pt" ? "Data" : "Date",
     selectDate: language === "pt" ? "Selecionar data" : "Select date",
+    fitToScreen: language === "pt" ? "Ajustar à Tela" : "Fit to Screen",
+    fullWidth: language === "pt" ? "Tamanho Real" : "Full Width",
   };
 
   // Parse date string to Date object
@@ -624,6 +646,43 @@ const FilterButtons = ({
             placeholderText={labels.selectDate}
             className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md"
           />
+        </div>
+
+        <div className="flex items-center ml-auto">
+          <button
+            onClick={() => setIsTableFitToScreen(!isTableFitToScreen)}
+            className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+              isTableFitToScreen
+                ? "bg-orange-500 text-white hover:bg-orange-600"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+            title={isTableFitToScreen ? labels.fullWidth : labels.fitToScreen}
+          >
+            <svg
+              className="w-4 h-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {isTableFitToScreen ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+                />
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 4H4m0 0v4m0-4l5 5m7-1V4m0 0h4m-4 0l5 5M8 20H4m0 0v-4m0 4l5-5m7 5l-5-5m5 5v4m0-4h4"
+                />
+              )}
+            </svg>
+            {isTableFitToScreen ? labels.fullWidth : labels.fitToScreen}
+          </button>
         </div>
       </div>
     </div>
@@ -748,6 +807,7 @@ const VehicleTable = ({
   sortField,
   sortDirection,
   onSort,
+  isTableFitToScreen,
 }) => {
   const headers = {
     lt: language === "pt" ? "LT" : "LT",
@@ -767,8 +827,10 @@ const VehicleTable = ({
   };
 
   return (
-    <div className="overflow-x-scroll scrollbar-hide">
-      <table className="min-w-full divide-y divide-gray-200 table-auto">
+    <div className="overflow-x-auto">
+      <table
+        className={`${isTableFitToScreen ? "w-full table-fixed" : "min-w-full table-auto"} divide-y divide-gray-200`}
+      >
         <thead className="bg-gray-50">
           <tr>
             <SortHeader
@@ -965,6 +1027,9 @@ const Dashboard = () => {
   // Sort state
   const [sortField, setSortField] = useState("");
   const [sortDirection, setSortDirection] = useState("asc");
+
+  // Table display mode state
+  const [isTableFitToScreen, setIsTableFitToScreen] = useState(false);
 
   // Get current date in DD/MM/YYYY format
   const today = new Date();
@@ -1211,6 +1276,8 @@ const Dashboard = () => {
                 selectedOrigin={selectedOrigin}
                 setSelectedDestination={setSelectedDestination}
                 setSelectedOrigin={setSelectedOrigin}
+                isTableFitToScreen={isTableFitToScreen}
+                setIsTableFitToScreen={setIsTableFitToScreen}
               />
 
               {loading ? (
@@ -1244,13 +1311,16 @@ const Dashboard = () => {
                   </button>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
+                <div
+                  className={`overflow-x-auto ${isTableFitToScreen ? "max-w-full" : ""}`}
+                >
                   <VehicleTable
                     vehicles={filteredVehicles}
                     language={language}
                     sortField={sortField}
                     sortDirection={sortDirection}
                     onSort={handleSort}
+                    isTableFitToScreen={isTableFitToScreen}
                   />
                 </div>
               )}
