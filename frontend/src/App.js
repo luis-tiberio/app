@@ -5,19 +5,19 @@ import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale, setDefaultLocale } from "react-datepicker";
-import { ptBR } from 'date-fns/locale/pt-BR';
-import { format, parse } from 'date-fns';
+import { ptBR } from "date-fns/locale/pt-BR";
+import { format, parse } from "date-fns";
 
 // Data alterada
 function parseDateBR(dateStr) {
   if (!dateStr) return null;
-  const [day, month, year] = dateStr.split('/');
+  const [day, month, year] = dateStr.split("/");
   return new Date(year, month - 1, day);
 }
 
 // Registrando o locale pt-BR para o DatePicker
-registerLocale('pt-BR', ptBR);
-setDefaultLocale('pt-BR');
+registerLocale("pt-BR", ptBR);
+setDefaultLocale("pt-BR");
 
 const BACKEND_URL = "https://app-backend2-bdfg.onrender.com";
 const API = `${BACKEND_URL}/api`;
@@ -42,7 +42,7 @@ const sampleVehicles = [
     status: "aguardando",
     status_agrupado: "ABERTA",
     data_referencia: "06/01/2024",
-    motorista: "ANDERSON LEOPOLDINO"
+    motorista: "ANDERSON LEOPOLDINO",
   },
   {
     trip_number: "LT0O15000OI01",
@@ -59,7 +59,7 @@ const sampleVehicles = [
     status: "aguardando",
     status_agrupado: "ABERTA",
     data_referencia: "05/01/2024",
-    motorista: "ANDERSON LEOPOLDINO"
+    motorista: "ANDERSON LEOPOLDINO",
   },
   {
     trip_number: "LT0O3M00121D1",
@@ -76,7 +76,7 @@ const sampleVehicles = [
     status: "concluido",
     status_agrupado: "FECHADA",
     data_referencia: "22/03/2024",
-    motorista: "Davi Luiz de Oliveira"
+    motorista: "Davi Luiz de Oliveira",
   },
   {
     trip_number: "LT0NCN000NAB1",
@@ -93,8 +93,8 @@ const sampleVehicles = [
     status: "programado",
     status_agrupado: "NO SHOW",
     data_referencia: "23/03/2024",
-    motorista: "WILLIAN PRADO SANCHES FELIX"
-  }
+    motorista: "WILLIAN PRADO SANCHES FELIX",
+  },
 ];
 
 // Helper function to determine vehicle status
@@ -139,52 +139,81 @@ const StatusChip = ({ status, language }) => {
   // Translate status for display
   let displayStatus = status;
   const statusMap = {
-    "pt": {
-      "programado": "Programado",
-      "aguardando": "Aguardando",
-      "descarregando": "Descarregando",
-      "concluido": "Concluído",
-      "atrasado": "Atrasado",
-      "desconhecido": "Desconhecido",
-      "no_show": "Não Compareceu",
-      "infrutifera": "Infrutífera"
+    pt: {
+      programado: "Programado",
+      aguardando: "Aguardando",
+      descarregando: "Descarregando",
+      concluido: "Concluído",
+      atrasado: "Atrasado",
+      desconhecido: "Desconhecido",
+      no_show: "Não Compareceu",
+      infrutifera: "Infrutífera",
     },
-    "en": {
-      "programado": "Scheduled",
-      "aguardando": "Waiting",
-      "descarregando": "Unloading",
-      "concluido": "Completed",
-      "atrasado": "Delayed",
-      "desconhecido": "Unknown",
-      "no_show": "No Show",
-      "infrutifera": "Unproductive"
-    }
+    en: {
+      programado: "Scheduled",
+      aguardando: "Waiting",
+      descarregando: "Unloading",
+      concluido: "Completed",
+      atrasado: "Delayed",
+      desconhecido: "Unknown",
+      no_show: "No Show",
+      infrutifera: "Unproductive",
+    },
   };
-  
+
   if (statusMap[language] && statusMap[language][status]) {
     displayStatus = statusMap[language][status];
   }
-  
+
   return (
-    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(status)}`}>
+    <span
+      className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(status)}`}
+    >
       {displayStatus}
     </span>
   );
 };
 
 // Status Agrupado Chip
-const StatusAgrupadoChip = ({ statusAgrupado }) => {
+const StatusAgrupadoChip = ({ statusAgrupado, language }) => {
   // Define color schemes for each status
   const colorMap = {
-    "ABERTA": "bg-green-100 text-green-800",
-    "FECHADA": "bg-blue-100 text-blue-800",
+    ABERTA: "bg-green-100 text-green-800",
+    FECHADA: "bg-blue-100 text-blue-800",
     "NO SHOW": "bg-red-100 text-red-800",
-    "INFRUTÍFERA": "bg-yellow-100 text-yellow-800"
+    INFRUTÍFERA: "bg-yellow-100 text-yellow-800",
+    CANCELADO: "bg-red-100 text-red-800",
   };
-  
+
+  // Translation map for status agrupado
+  const translationMap = {
+    pt: {
+      ABERTA: "ABERTA",
+      FECHADA: "FECHADA",
+      "NO SHOW": "NÃO COMPARECEU",
+      INFRUTÍFERA: "INFRUTÍFERA",
+      CANCELADO: "CANCELADO",
+    },
+    en: {
+      ABERTA: "OPEN",
+      FECHADA: "CLOSED",
+      "NO SHOW": "NO SHOW",
+      INFRUTÍFERA: "UNPRODUCTIVE",
+      CANCELADO: "CANCELED",
+    },
+  };
+
+  // Get translated text
+  const translatedStatus =
+    translationMap[language] && translationMap[language][statusAgrupado]
+      ? translationMap[language][statusAgrupado]
+      : statusAgrupado;
+
   return (
-    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${colorMap[statusAgrupado] || "bg-gray-100 text-gray-800"}`}>
-      {statusAgrupado}
+    <span
+      className={`px-2 py-1 rounded-full text-xs font-semibold ${colorMap[statusAgrupado] || "bg-gray-100 text-gray-800"}`}
+    >
+      {translatedStatus}
     </span>
   );
 };
@@ -193,15 +222,15 @@ const StatusAgrupadoChip = ({ statusAgrupado }) => {
 const LanguageToggle = ({ language, setLanguage }) => {
   return (
     <div className="flex items-center space-x-2">
-      <button 
-        className={`px-3 py-1 rounded-md text-sm font-medium ${language === 'pt' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-        onClick={() => setLanguage('pt')}
+      <button
+        className={`px-3 py-1 rounded-md text-sm font-medium ${language === "pt" ? "bg-orange-500 text-white" : "bg-gray-200 text-gray-700"}`}
+        onClick={() => setLanguage("pt")}
       >
         PT
       </button>
-      <button 
-        className={`px-3 py-1 rounded-md text-sm font-medium ${language === 'en' ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-        onClick={() => setLanguage('en')}
+      <button
+        className={`px-3 py-1 rounded-md text-sm font-medium ${language === "en" ? "bg-orange-500 text-white" : "bg-gray-200 text-gray-700"}`}
+        onClick={() => setLanguage("en")}
       >
         EN
       </button>
@@ -212,27 +241,27 @@ const LanguageToggle = ({ language, setLanguage }) => {
 // DateTime Component using São Paulo timezone
 const DateTime = () => {
   const [dateTime, setDateTime] = useState(new Date());
-  
+
   useEffect(() => {
     const timer = setInterval(() => {
       setDateTime(new Date());
     }, 1000);
-    
+
     return () => clearInterval(timer);
   }, []);
-  
+
   // Format date and time according to São Paulo/Brazil locale
-  const formattedDate = dateTime.toLocaleDateString('pt-BR', { 
-    timeZone: 'America/Sao_Paulo' 
+  const formattedDate = dateTime.toLocaleDateString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
   });
-  
-  const formattedTime = dateTime.toLocaleTimeString('pt-BR', { 
-    timeZone: 'America/Sao_Paulo',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
+
+  const formattedTime = dateTime.toLocaleTimeString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
   });
-  
+
   return (
     <div className="text-right text-sm text-gray-600">
       <div>{formattedDate}</div>
@@ -243,16 +272,16 @@ const DateTime = () => {
 
 // Header Component
 const Header = ({ language, setLanguage, warehouseCode }) => {
-  const title = language === 'pt' ? 'Inbound' : 'Inbound';
-  
+  const title = language === "pt" ? "Inbound" : "Inbound";
+
   return (
     <div className="bg-white shadow">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <img 
-              src="/images/shopee-express-logo.png" 
-              alt="ShopeeXPRESS Logo" 
+            <img
+              src="/images/shopee-express-logo.png"
+              alt="ShopeeXPRESS Logo"
               className="h-10"
             />
             <div className="ml-4">
@@ -274,87 +303,147 @@ const Header = ({ language, setLanguage, warehouseCode }) => {
 // Dashboard Stats Component
 const DashboardStats = ({ counts, language }) => {
   const labels = {
-    total: language === 'pt' ? 'Total de Veículos' : 'Total Vehicles',
-    scheduled: language === 'pt' ? 'Programados' : 'Scheduled',
-    waiting: language === 'pt' ? 'Aguardando' : 'Waiting',
-    completed: language === 'pt' ? 'Concluídos' : 'Completed'
+    total: language === "pt" ? "Total de Veículos" : "Total Vehicles",
+    scheduled: language === "pt" ? "Programados" : "Scheduled",
+    waiting: language === "pt" ? "Aguardando" : "Waiting",
+    completed: language === "pt" ? "Concluídos" : "Completed",
   };
-  
+
   return (
     <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
       <div className="bg-white overflow-hidden shadow rounded-lg">
         <div className="p-5">
           <div className="flex items-center">
             <div className="flex-shrink-0 bg-orange-500 rounded-md p-3">
-              <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+              <svg
+                className="h-6 w-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                ></path>
               </svg>
             </div>
             <div className="ml-5 w-0 flex-1">
               <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">{labels.total}</dt>
+                <dt className="text-sm font-medium text-gray-500 truncate">
+                  {labels.total}
+                </dt>
                 <dd className="flex items-baseline">
-                  <div className="text-2xl font-semibold text-gray-900">{counts.total}</div>
+                  <div className="text-2xl font-semibold text-gray-900">
+                    {counts.total}
+                  </div>
                 </dd>
               </dl>
             </div>
           </div>
         </div>
       </div>
-      
+
       <div className="bg-white overflow-hidden shadow rounded-lg">
         <div className="p-5">
           <div className="flex items-center">
             <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
-              <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              <svg
+                className="h-6 w-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
               </svg>
             </div>
             <div className="ml-5 w-0 flex-1">
               <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">{labels.scheduled}</dt>
+                <dt className="text-sm font-medium text-gray-500 truncate">
+                  {labels.scheduled}
+                </dt>
                 <dd className="flex items-baseline">
-                  <div className="text-2xl font-semibold text-gray-900">{counts.scheduled}</div>
+                  <div className="text-2xl font-semibold text-gray-900">
+                    {counts.scheduled}
+                  </div>
                 </dd>
               </dl>
             </div>
           </div>
         </div>
       </div>
-      
+
       <div className="bg-white overflow-hidden shadow rounded-lg">
         <div className="p-5">
           <div className="flex items-center">
             <div className="flex-shrink-0 bg-yellow-500 rounded-md p-3">
-              <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              <svg
+                className="h-6 w-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
               </svg>
             </div>
             <div className="ml-5 w-0 flex-1">
               <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">{labels.waiting}</dt>
+                <dt className="text-sm font-medium text-gray-500 truncate">
+                  {labels.waiting}
+                </dt>
                 <dd className="flex items-baseline">
-                  <div className="text-2xl font-semibold text-gray-900">{counts.waiting}</div>
+                  <div className="text-2xl font-semibold text-gray-900">
+                    {counts.waiting}
+                  </div>
                 </dd>
               </dl>
             </div>
           </div>
         </div>
       </div>
-      
+
       <div className="bg-white overflow-hidden shadow rounded-lg">
         <div className="p-5">
           <div className="flex items-center">
             <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
-              <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              <svg
+                className="h-6 w-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13l4 4L19 7"
+                ></path>
               </svg>
             </div>
             <div className="ml-5 w-0 flex-1">
               <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">{labels.completed}</dt>
+                <dt className="text-sm font-medium text-gray-500 truncate">
+                  {labels.completed}
+                </dt>
                 <dd className="flex items-baseline">
-                  <div className="text-2xl font-semibold text-gray-900">{counts.completed}</div>
+                  <div className="text-2xl font-semibold text-gray-900">
+                    {counts.completed}
+                  </div>
                 </dd>
               </dl>
             </div>
@@ -366,8 +455,8 @@ const DashboardStats = ({ counts, language }) => {
 };
 
 // Filter Buttons Component
-const FilterButtons = ({ 
-  language, 
+const FilterButtons = ({
+  language,
   destinations,
   origins,
   selectedDate,
@@ -375,21 +464,21 @@ const FilterButtons = ({
   selectedDestination,
   selectedOrigin,
   setSelectedDestination,
-  setSelectedOrigin
+  setSelectedOrigin,
 }) => {
   const labels = {
-    all: language === 'pt' ? 'Todos' : 'All',
-    destination: language === 'pt' ? 'Destino' : 'Destination',
-    origin: language === 'pt' ? 'Origem' : 'Origin',
-    date: language === 'pt' ? 'Data' : 'Date',
-    selectDate: language === 'pt' ? 'Selecionar data' : 'Select date'
+    all: language === "pt" ? "Todos" : "All",
+    destination: language === "pt" ? "Destino" : "Destination",
+    origin: language === "pt" ? "Origem" : "Origin",
+    date: language === "pt" ? "Data" : "Date",
+    selectDate: language === "pt" ? "Selecionar data" : "Select date",
   };
-  
+
   // Parse date string to Date object
   const parseDateString = (dateString) => {
-    if (!dateString || dateString === 'all') return null;
+    if (!dateString || dateString === "all") return null;
     // Handle different date formats (assuming DD/MM/YYYY)
-    const parts = dateString.split('/');
+    const parts = dateString.split("/");
     if (parts.length === 3) {
       return new Date(parts[2], parts[1] - 1, parts[0]);
     }
@@ -400,7 +489,10 @@ const FilterButtons = ({
     <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 sm:px-6">
       <div className="flex flex-wrap gap-3 items-center">
         <div className="flex items-center">
-          <label htmlFor="destination-select" className="mr-2 text-sm font-medium text-gray-700">
+          <label
+            htmlFor="destination-select"
+            className="mr-2 text-sm font-medium text-gray-700"
+          >
             {labels.destination}:
           </label>
           <select
@@ -411,13 +503,18 @@ const FilterButtons = ({
           >
             <option value="all">{labels.all}</option>
             {destinations.map((dest) => (
-              <option key={dest} value={dest}>{dest}</option>
+              <option key={dest} value={dest}>
+                {dest}
+              </option>
             ))}
           </select>
         </div>
-        
+
         <div className="flex items-center">
-          <label htmlFor="origin-select" className="mr-2 text-sm font-medium text-gray-700">
+          <label
+            htmlFor="origin-select"
+            className="mr-2 text-sm font-medium text-gray-700"
+          >
             {labels.origin}:
           </label>
           <select
@@ -428,24 +525,29 @@ const FilterButtons = ({
           >
             <option value="all">{labels.all}</option>
             {origins.map((origin) => (
-              <option key={origin} value={origin}>{origin}</option>
+              <option key={origin} value={origin}>
+                {origin}
+              </option>
             ))}
           </select>
         </div>
-        
+
         <div className="flex items-center">
-          <label htmlFor="date-picker" className="mr-2 text-sm font-medium text-gray-700">
+          <label
+            htmlFor="date-picker"
+            className="mr-2 text-sm font-medium text-gray-700"
+          >
             {labels.date}:
           </label>
           <DatePicker
             id="date-picker"
             selected={parseDateString(selectedDate)}
-            onChange={date => {
+            onChange={(date) => {
               if (date) {
-                const formattedDate = format(date, 'dd/MM/yyyy');
+                const formattedDate = format(date, "dd/MM/yyyy");
                 setSelectedDate(formattedDate);
               } else {
-                setSelectedDate('all');
+                setSelectedDate("all");
               }
             }}
             dateFormat="dd/MM/yyyy"
@@ -461,26 +563,28 @@ const FilterButtons = ({
 };
 
 // Search and Filter Component
-const SearchAndFilter = ({ 
-  onSearchChange, 
-  onStatusFilterChange, 
+const SearchAndFilter = ({
+  onSearchChange,
+  onStatusFilterChange,
   selectedStatus,
-  language
+  language,
 }) => {
   const labels = {
-    vehicleList: language === 'pt' ? 'Lista de Veículos' : 'Vehicle List',
-    search: language === 'pt' ? 'Pesquisar...' : 'Search...',
-    allStatuses: language === 'pt' ? 'Todos os Status' : 'All Statuses',
-    scheduled: language === 'pt' ? 'Programados' : 'Scheduled',
-    waiting: language === 'pt' ? 'Aguardando' : 'Waiting',
-    completed: language === 'pt' ? 'Concluídos' : 'Completed'
+    vehicleList: language === "pt" ? "Lista de Veículos" : "Vehicle List",
+    search: language === "pt" ? "Pesquisar..." : "Search...",
+    allStatuses: language === "pt" ? "Todos os Status" : "All Statuses",
+    scheduled: language === "pt" ? "Programados" : "Scheduled",
+    waiting: language === "pt" ? "Aguardando" : "Waiting",
+    completed: language === "pt" ? "Concluídos" : "Completed",
   };
-  
+
   return (
     <div className="bg-white px-4 py-5 border-b border-gray-200 sm:px-6">
       <div className="-ml-4 -mt-2 flex flex-wrap items-center justify-between sm:flex-nowrap">
         <div className="ml-4 mt-2">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">{labels.vehicleList}</h3>
+          <h3 className="text-lg leading-6 font-medium text-gray-900">
+            {labels.vehicleList}
+          </h3>
         </div>
         <div className="ml-4 mt-2 flex-shrink-0">
           <div className="flex space-x-3">
@@ -502,8 +606,19 @@ const SearchAndFilter = ({
                 onChange={onSearchChange}
               />
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  className="h-5 w-5 text-gray-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
               </div>
             </div>
@@ -514,72 +629,192 @@ const SearchAndFilter = ({
   );
 };
 
+// Sort Header Component
+const SortHeader = ({ children, field, sortField, sortDirection, onSort }) => {
+  const isActive = sortField === field;
+
+  return (
+    <th
+      scope="col"
+      className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+    >
+      <button
+        className="flex items-center justify-center w-full group hover:text-gray-700 focus:outline-none focus:text-gray-700"
+        onClick={() => onSort(field)}
+      >
+        <span className="mr-2">{children}</span>
+        <div className="flex flex-col">
+          <svg
+            className={`w-3 h-3 ${isActive && sortDirection === "asc" ? "text-orange-500" : "text-gray-300 group-hover:text-gray-400"}`}
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <svg
+            className={`w-3 h-3 -mt-1 ${isActive && sortDirection === "desc" ? "text-orange-500" : "text-gray-300 group-hover:text-gray-400"}`}
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            style={{ transform: "rotate(180deg)" }}
+          >
+            <path
+              fillRule="evenodd"
+              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </div>
+      </button>
+    </th>
+  );
+};
+
 // Vehicle Table Component
-const VehicleTable = ({ vehicles, language }) => {
+const VehicleTable = ({
+  vehicles,
+  language,
+  sortField,
+  sortDirection,
+  onSort,
+}) => {
   const headers = {
-    lt: language === 'pt' ? 'LT' : 'LT',
-    pacotes: language === 'pt' ? 'Pacotes' : 'Packages',
-    statusAgrupado: language === 'pt' ? 'Status Agrupado' : 'Grouped Status',
-    solicitacao: language === 'pt' ? 'Solicitação' : 'Solicitation',
-    destino: language === 'pt' ? 'Destino' : 'Destination',
-    origem: language === 'pt' ? 'Origem' : 'Origin', 
-    motorista: language === 'pt' ? 'Motorista' : 'Driver',
-    placa: language === 'pt' ? 'Placa' : 'License Plate',
-    veiculo: language === 'pt' ? 'Veículo' : 'Vehicle',
-    etaProgramado: language === 'pt' ? 'ETA Programado' : 'ETA Scheduled',
-    etaRealizado: language === 'pt' ? 'ETA Realizado' : 'ETA Realized',
-    descarga: language === 'pt' ? 'Descarga' : 'Unloading',
-    status: language === 'pt' ? 'Status' : 'Status',
-    tempoTotal: language === 'pt' ? 'Tempo Total' : 'Total Time'
+    lt: language === "pt" ? "LT" : "LT",
+    pacotes: language === "pt" ? "Pacotes" : "Packages",
+    statusAgrupado: language === "pt" ? "Status Agrupado" : "Grouped Status",
+    solicitacao: language === "pt" ? "Solicitação" : "Solicitation",
+    destino: language === "pt" ? "Destino" : "Destination",
+    origem: language === "pt" ? "Origem" : "Origin",
+    motorista: language === "pt" ? "Motorista" : "Driver",
+    placa: language === "pt" ? "Placa" : "License Plate",
+    veiculo: language === "pt" ? "Veículo" : "Vehicle",
+    etaProgramado: language === "pt" ? "ETA Programado" : "ETA Scheduled",
+    etaRealizado: language === "pt" ? "ETA Realizado" : "ETA Realized",
+    descarga: language === "pt" ? "Descarga" : "Unloading",
+    status: language === "pt" ? "Status" : "Status",
+    tempoTotal: language === "pt" ? "Tempo Total" : "Total Time",
   };
-  
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200 table-auto">
         <thead className="bg-gray-50">
           <tr>
-            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <SortHeader
+              field="trip_number"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            >
               {headers.lt}
-            </th>
-            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            </SortHeader>
+            <SortHeader
+              field="total_orders"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            >
               {headers.pacotes}
-            </th>
-            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            </SortHeader>
+            <SortHeader
+              field="status_agrupado"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            >
               {headers.statusAgrupado}
-            </th>
-            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            </SortHeader>
+            <SortHeader
+              field="solicitation_by"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            >
               {headers.solicitacao}
-            </th>
-            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            </SortHeader>
+            <SortHeader
+              field="destination_station_code"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            >
               {headers.destino}
-            </th>
-            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            </SortHeader>
+            <SortHeader
+              field="origin_station_code"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            >
               {headers.origem}
-            </th>
-            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            </SortHeader>
+            <SortHeader
+              field="motorista"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            >
               {headers.motorista}
-            </th>
-            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            </SortHeader>
+            <SortHeader
+              field="license_plate"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            >
               {headers.placa}
-            </th>
-            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            </SortHeader>
+            <SortHeader
+              field="planned_vehicle"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            >
               {headers.veiculo}
-            </th>
-            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            </SortHeader>
+            <SortHeader
+              field="eta_destination_scheduled"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            >
               {headers.etaProgramado}
-            </th>
-            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            </SortHeader>
+            <SortHeader
+              field="eta_destination_realized"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            >
               {headers.etaRealizado}
-            </th>
-            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            </SortHeader>
+            <SortHeader
+              field="horario_de_descarga"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            >
               {headers.descarga}
-            </th>
-            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            </SortHeader>
+            <SortHeader
+              field="status"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            >
               {headers.status}
-            </th>
-            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            </SortHeader>
+            <SortHeader
+              field="tempo_total"
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            >
               {headers.tempoTotal}
-            </th>
+            </SortHeader>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -591,11 +826,14 @@ const VehicleTable = ({ vehicles, language }) => {
                   {vehicle.trip_number}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  {vehicle.total_orders || '0'}
+                  {vehicle.total_orders || "0"}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-center">
                   <div className="flex justify-center">
-                    <StatusAgrupadoChip statusAgrupado={vehicle.status_agrupado} />
+                    <StatusAgrupadoChip
+                      statusAgrupado={vehicle.status_agrupado}
+                      language={language}
+                    />
                   </div>
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
@@ -617,13 +855,13 @@ const VehicleTable = ({ vehicles, language }) => {
                   {vehicle.planned_vehicle}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  {vehicle.eta_destination_scheduled || '-'}
+                  {vehicle.eta_destination_scheduled || "-"}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  {vehicle.eta_destination_realized || '-'}
+                  {vehicle.eta_destination_realized || "-"}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  {vehicle.horario_de_descarga || '-'}
+                  {vehicle.horario_de_descarga || "-"}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-center">
                   <div className="flex justify-center">
@@ -631,7 +869,7 @@ const VehicleTable = ({ vehicles, language }) => {
                   </div>
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  {vehicle.tempo_total || '-'}
+                  {vehicle.tempo_total || "-"}
                 </td>
               </tr>
             );
@@ -646,33 +884,47 @@ const VehicleTable = ({ vehicles, language }) => {
 const Dashboard = () => {
   const [vehicles, setVehicles] = useState(sampleVehicles);
   const [filteredVehicles, setFilteredVehicles] = useState(sampleVehicles);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [language, setLanguage] = useState('pt'); // Default to Portuguese
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [language, setLanguage] = useState("pt"); // Default to Portuguese
   const [warehouseCode, setWarehouseCode] = useState(WAREHOUSE_CODE);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
+  // Sort state
+  const [sortField, setSortField] = useState("");
+  const [sortDirection, setSortDirection] = useState("asc");
+
   // Get current date in DD/MM/YYYY format
   const today = new Date();
-  const formattedToday = format(today, 'dd/MM/yyyy');
-  
+  const formattedToday = format(today, "dd/MM/yyyy");
+
   // Additional filters
-  const [selectedDestination, setSelectedDestination] = useState('all');
-  const [selectedOrigin, setSelectedOrigin] = useState('all');
+  const [selectedDestination, setSelectedDestination] = useState("all");
+  const [selectedOrigin, setSelectedOrigin] = useState("all");
   const [selectedDate, setSelectedDate] = useState(formattedToday);
-  
+
   // Extract unique values for filters
-  const destinations = [...new Set(vehicles.map(v => v.destination_station_code).filter(Boolean))];
-  const origins = [...new Set(vehicles.map(v => v.origin_station_code).filter(Boolean))];
+  const destinations = [
+    ...new Set(vehicles.map((v) => v.destination_station_code).filter(Boolean)),
+  ];
+  const origins = [
+    ...new Set(vehicles.map((v) => v.origin_station_code).filter(Boolean)),
+  ];
 
   // Count vehicles by status
-const counts = {
-  total: filteredVehicles.length,
-  scheduled: filteredVehicles.filter(v => getVehicleStatus(v) === 'programado').length,
-  waiting: filteredVehicles.filter(v => getVehicleStatus(v) === 'aguardando').length,
-  completed: filteredVehicles.filter(v => getVehicleStatus(v) === 'concluido').length
-};
+  const counts = {
+    total: filteredVehicles.length,
+    scheduled: filteredVehicles.filter(
+      (v) => getVehicleStatus(v) === "programado",
+    ).length,
+    waiting: filteredVehicles.filter(
+      (v) => getVehicleStatus(v) === "aguardando",
+    ).length,
+    completed: filteredVehicles.filter(
+      (v) => getVehicleStatus(v) === "concluido",
+    ).length,
+  };
 
   // Handle search
   const handleSearchChange = (e) => {
@@ -684,73 +936,154 @@ const counts = {
     setStatusFilter(e.target.value);
   };
 
+  // Handle sort
+  const handleSort = (field) => {
+    if (sortField === field) {
+      // If clicking the same field, toggle direction
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      // If clicking a different field, set it as active with ascending direction
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  // Sort function
+  const sortVehicles = (vehiclesToSort) => {
+    if (!sortField) return vehiclesToSort;
+
+    return [...vehiclesToSort].sort((a, b) => {
+      let aValue = a[sortField] || "";
+      let bValue = b[sortField] || "";
+
+      // Handle numeric fields
+      if (sortField === "total_orders") {
+        aValue = parseInt(aValue) || 0;
+        bValue = parseInt(bValue) || 0;
+      }
+
+      // Handle date fields
+      if (
+        sortField.includes("eta_") ||
+        sortField.includes("horario_") ||
+        sortField.includes("data_")
+      ) {
+        aValue = aValue
+          ? new Date(aValue.split(" ")[0].split("/").reverse().join("-"))
+          : new Date(0);
+        bValue = bValue
+          ? new Date(bValue.split(" ")[0].split("/").reverse().join("-"))
+          : new Date(0);
+      }
+
+      // Convert to string for comparison if not already numbers or dates
+      if (typeof aValue === "string") {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+
+      if (aValue < bValue) {
+        return sortDirection === "asc" ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortDirection === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+  };
+
   // Apply all filters
   useEffect(() => {
     let filtered = vehicles;
-    
-    // Apply status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(vehicle => 
-        vehicle.status === statusFilter || getVehicleStatus(vehicle) === statusFilter
-      );
-    }
-    
-    // Apply destination filter
-    if (selectedDestination !== 'all') {
-      filtered = filtered.filter(vehicle => 
-        vehicle.destination_station_code === selectedDestination
-      );
-    }
-    
-    // Apply origin filter
-    if (selectedOrigin !== 'all') {
-      filtered = filtered.filter(vehicle => 
-        vehicle.origin_station_code === selectedOrigin
-      );
-    }
-    
-    // Apply date filter
-if (selectedDate !== 'all') {
-  filtered = filtered.filter(vehicle => {
-    const itemDate = parseDateBR(vehicle.data_referencia);
-    const selected = parseDateBR(selectedDate);
-    if (!itemDate || !selected) return false;
-    return itemDate.toDateString() === selected.toDateString();
-  });
-}
 
-    
+    // Apply status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(
+        (vehicle) =>
+          vehicle.status === statusFilter ||
+          getVehicleStatus(vehicle) === statusFilter,
+      );
+    }
+
+    // Apply destination filter
+    if (selectedDestination !== "all") {
+      filtered = filtered.filter(
+        (vehicle) => vehicle.destination_station_code === selectedDestination,
+      );
+    }
+
+    // Apply origin filter
+    if (selectedOrigin !== "all") {
+      filtered = filtered.filter(
+        (vehicle) => vehicle.origin_station_code === selectedOrigin,
+      );
+    }
+
+    // Apply date filter
+    if (selectedDate !== "all") {
+      filtered = filtered.filter((vehicle) => {
+        const itemDate = parseDateBR(vehicle.data_referencia);
+        const selected = parseDateBR(selectedDate);
+        if (!itemDate || !selected) return false;
+        return itemDate.toDateString() === selected.toDateString();
+      });
+    }
+
     // Apply search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(vehicle => 
-        (vehicle.trip_number?.toLowerCase().includes(term) || false) ||
-        (vehicle.planned_vehicle?.toLowerCase().includes(term) || false) ||
-        (vehicle.license_plate?.toLowerCase().includes(term) || false) ||
-        (vehicle.motorista?.toLowerCase().includes(term) || false) ||
-        (vehicle.origin_station_code?.toLowerCase().includes(term) || false) ||
-        (vehicle.destination_station_code?.toLowerCase().includes(term) || false) ||
-        (vehicle.solicitation_by?.toLowerCase().includes(term) || false)
+      filtered = filtered.filter(
+        (vehicle) =>
+          vehicle.trip_number?.toLowerCase().includes(term) ||
+          false ||
+          vehicle.planned_vehicle?.toLowerCase().includes(term) ||
+          false ||
+          vehicle.license_plate?.toLowerCase().includes(term) ||
+          false ||
+          vehicle.motorista?.toLowerCase().includes(term) ||
+          false ||
+          vehicle.origin_station_code?.toLowerCase().includes(term) ||
+          false ||
+          vehicle.destination_station_code?.toLowerCase().includes(term) ||
+          false ||
+          vehicle.solicitation_by?.toLowerCase().includes(term) ||
+          false,
       );
     }
-    
+
+    // Apply sorting
+    filtered = sortVehicles(filtered);
+
     setFilteredVehicles(filtered);
-  }, [searchTerm, statusFilter, selectedDestination, selectedOrigin, selectedDate, vehicles]);
+  }, [
+    searchTerm,
+    statusFilter,
+    selectedDestination,
+    selectedOrigin,
+    selectedDate,
+    vehicles,
+    sortField,
+    sortDirection,
+  ]);
 
   // Função para buscar dados da API do backend
   const fetchVehicleData = async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Chamada para o nosso backend que fará a ponte com o Google Sheets
       console.log("Buscando dados da API:", `${API}/vehicles`);
       const response = await axios.get(`${API}/vehicles`);
-      
+
       // Verificar se os dados são válidos
       if (response.data && Array.isArray(response.data)) {
         setVehicles(response.data);
-        console.log("Dados carregados com sucesso:", response.data.length, "veículos");
+        console.log(
+          "Dados carregados com sucesso:",
+          response.data.length,
+          "veículos",
+        );
       } else {
         console.error("Formato de dados inválido da API");
         // Em caso de erro, usamos os dados de exemplo
@@ -770,34 +1103,34 @@ if (selectedDate !== 'all') {
   useEffect(() => {
     // Buscar dados quando o componente for montado
     fetchVehicleData();
-    
+
     // Configurar atualização periódica (a cada 5 minutos)
     const intervalId = setInterval(fetchVehicleData, 5 * 60 * 1000);
-    
+
     return () => clearInterval(intervalId);
   }, []);
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Header 
-        language={language} 
-        setLanguage={setLanguage} 
-        warehouseCode={warehouseCode} 
+      <Header
+        language={language}
+        setLanguage={setLanguage}
+        warehouseCode={warehouseCode}
       />
       <main>
         <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <DashboardStats counts={counts} language={language} />
-          
+
           <div className="px-4 py-6 sm:px-0">
             <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-              <SearchAndFilter 
-                onSearchChange={handleSearchChange} 
+              <SearchAndFilter
+                onSearchChange={handleSearchChange}
                 onStatusFilterChange={handleStatusFilterChange}
                 selectedStatus={statusFilter}
                 language={language}
               />
-              
-              <FilterButtons 
+
+              <FilterButtons
                 language={language}
                 destinations={destinations}
                 origins={origins}
@@ -808,7 +1141,7 @@ if (selectedDate !== 'all') {
                 setSelectedDestination={setSelectedDestination}
                 setSelectedOrigin={setSelectedOrigin}
               />
-              
+
               {loading ? (
                 <div className="flex justify-center items-center py-20">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
@@ -816,23 +1149,37 @@ if (selectedDate !== 'all') {
               ) : error ? (
                 <div className="flex justify-center items-center py-20 flex-col">
                   <div className="text-red-500 mb-4">
-                    <svg className="h-12 w-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <svg
+                      className="h-12 w-12 mx-auto"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      ></path>
                     </svg>
                   </div>
                   <p className="text-gray-700">{error}</p>
-                  <button 
+                  <button
                     onClick={fetchVehicleData}
                     className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                   >
-                    {language === 'pt' ? 'Tentar Novamente' : 'Try Again'}
+                    {language === "pt" ? "Tentar Novamente" : "Try Again"}
                   </button>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <VehicleTable 
+                  <VehicleTable
                     vehicles={filteredVehicles}
                     language={language}
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
                   />
                 </div>
               )}
