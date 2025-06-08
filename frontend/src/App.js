@@ -95,6 +95,23 @@ const sampleVehicles = [
     data_referencia: "23/03/2024",
     motorista: "WILLIAN PRADO SANCHES FELIX",
   },
+  {
+    trip_number: "LT0XYZ456CAN1",
+    solicitation_by: "SHOPEE",
+    planned_vehicle: "CAMINHÃO",
+    license_plate: "ABC1D23",
+    origin_station_code: "SoC_SP_Campinas",
+    destination_station_code: "SOC-SP5",
+    eta_destination_scheduled: "24/03/2024 14:00",
+    eta_destination_realized: "",
+    horario_de_descarga: "",
+    total_orders: "7",
+    tempo_total: "",
+    status: "cancelado",
+    status_agrupado: "CANCELADO",
+    data_referencia: "24/03/2024",
+    motorista: "CARLOS SILVA",
+  },
 ];
 
 // Helper function to determine vehicle status
@@ -277,7 +294,28 @@ const Header = ({ language, setLanguage, warehouseCode }) => {
   return (
     <div className="bg-white shadow">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        {/* Mobile Layout */}
+        <div className="sm:hidden">
+          <div className="flex items-center justify-between h-16">
+            <img
+              src="/images/shopee-express-logo.png"
+              alt="ShopeeXPRESS Logo"
+              className="h-8"
+            />
+            <div className="flex items-center space-x-2">
+              <DateTime />
+              <LanguageToggle language={language} setLanguage={setLanguage} />
+            </div>
+          </div>
+          <div className="pb-4">
+            <h1 className="text-lg font-bold text-orange-500 text-center">
+              {title} - {warehouseCode}
+            </h1>
+          </div>
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden sm:flex items-center justify-between h-16">
           <div className="flex items-center">
             <img
               src="/images/shopee-express-logo.png"
@@ -332,10 +370,10 @@ const DashboardStats = ({ counts, language }) => {
             </div>
             <div className="ml-5 w-0 flex-1">
               <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">
+                <dt className="text-sm font-medium text-gray-500 truncate text-center">
                   {labels.total}
                 </dt>
-                <dd className="flex items-baseline">
+                <dd className="flex items-baseline justify-center">
                   <div className="text-2xl font-semibold text-gray-900">
                     {counts.total}
                   </div>
@@ -367,10 +405,10 @@ const DashboardStats = ({ counts, language }) => {
             </div>
             <div className="ml-5 w-0 flex-1">
               <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">
+                <dt className="text-sm font-medium text-gray-500 truncate text-center">
                   {labels.scheduled}
                 </dt>
-                <dd className="flex items-baseline">
+                <dd className="flex items-baseline justify-center">
                   <div className="text-2xl font-semibold text-gray-900">
                     {counts.scheduled}
                   </div>
@@ -402,10 +440,10 @@ const DashboardStats = ({ counts, language }) => {
             </div>
             <div className="ml-5 w-0 flex-1">
               <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">
+                <dt className="text-sm font-medium text-gray-500 truncate text-center">
                   {labels.waiting}
                 </dt>
-                <dd className="flex items-baseline">
+                <dd className="flex items-baseline justify-center">
                   <div className="text-2xl font-semibold text-gray-900">
                     {counts.waiting}
                   </div>
@@ -437,10 +475,10 @@ const DashboardStats = ({ counts, language }) => {
             </div>
             <div className="ml-5 w-0 flex-1">
               <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">
+                <dt className="text-sm font-medium text-gray-500 truncate text-center">
                   {labels.completed}
                 </dt>
-                <dd className="flex items-baseline">
+                <dd className="flex items-baseline justify-center">
                   <div className="text-2xl font-semibold text-gray-900">
                     {counts.completed}
                   </div>
@@ -699,7 +737,7 @@ const VehicleTable = ({
   };
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-scroll scrollbar-hide">
       <table className="min-w-full divide-y divide-gray-200 table-auto">
         <thead className="bg-gray-50">
           <tr>
