@@ -16,18 +16,79 @@ code {
     source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
-/* Hide scrollbars but keep functionality */
-.scrollbar-hide {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
-}
-
-/* Alternative: Remove any potential overflow indicators */
-.overflow-x-scroll {
-  overflow-x: scroll;
+/* Scrollbar styling - keep horizontal scrollbars visible */
+.overflow-x-auto {
+  overflow-x: auto;
   overflow-y: hidden;
+}
+
+/* Optional: Style the scrollbar for better appearance */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 12px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Table fit to screen mode */
+.table-fixed {
+  table-layout: fixed;
+}
+
+.table-fixed td,
+.table-fixed th {
+  font-size: 10px !important;
+  line-height: 12px !important;
+  padding: 4px 2px !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  vertical-align: top !important;
+}
+
+.table-fixed th {
+  font-size: 9px !important;
+  line-height: 11px !important;
+  padding: 4px 2px !important;
+  font-weight: 600 !important;
+}
+
+.table-fixed td:hover,
+.table-fixed th:hover {
+  font-size: 12px !important;
+  line-height: 16px !important;
+  z-index: 10;
+  position: relative;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  padding: 6px 4px !important;
+}
+
+/* Specific styling for status chips in fit mode */
+.table-fixed .status-chip {
+  font-size: 8px !important;
+  padding: 1px 4px !important;
+  line-height: 10px !important;
+  display: inline-block;
+  min-width: auto !important;
+}
+
+/* Ensure table cells don't have minimum width constraints */
+.table-fixed td,
+.table-fixed th {
+  min-width: 0 !important;
+  width: auto !important;
 }
