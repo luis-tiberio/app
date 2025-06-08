@@ -165,6 +165,7 @@ const StatusChip = ({ status, language }) => {
       desconhecido: "Desconhecido",
       no_show: "Não Compareceu",
       infrutifera: "Infrutífera",
+      cancelado: "Cancelado",
     },
     en: {
       programado: "Scheduled",
@@ -175,6 +176,7 @@ const StatusChip = ({ status, language }) => {
       desconhecido: "Unknown",
       no_show: "No Show",
       infrutifera: "Unproductive",
+      cancelado: "Canceled",
     },
   };
 
@@ -189,6 +191,34 @@ const StatusChip = ({ status, language }) => {
       {displayStatus}
     </span>
   );
+};
+
+// Vehicle Type Chip Component
+const VehicleTypeChip = ({ vehicleType, language }) => {
+  const vehicleMap = {
+    pt: {
+      CAMINHÃO: "CAMINHÃO",
+      VAN: "VAN",
+      MOTO: "MOTO",
+      CARRO: "CARRO",
+      BICICLETA: "BICICLETA",
+    },
+    en: {
+      CAMINHÃO: "TRUCK",
+      VAN: "VAN",
+      MOTO: "MOTORCYCLE",
+      CARRO: "CAR",
+      BICICLETA: "BICYCLE",
+    },
+  };
+
+  // Get translated text
+  const translatedVehicle =
+    vehicleMap[language] && vehicleMap[language][vehicleType]
+      ? vehicleMap[language][vehicleType]
+      : vehicleType;
+
+  return translatedVehicle;
 };
 
 // Status Agrupado Chip
@@ -295,7 +325,7 @@ const Header = ({ language, setLanguage, warehouseCode }) => {
     <div className="bg-white shadow">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Mobile Layout */}
-        <div className="sm:hidden">
+        <div className="md:hidden">
           <div className="flex items-center justify-between h-16">
             <img
               src="/images/shopee-express-logo.png"
@@ -315,7 +345,7 @@ const Header = ({ language, setLanguage, warehouseCode }) => {
         </div>
 
         {/* Desktop Layout */}
-        <div className="hidden sm:flex items-center justify-between h-16">
+        <div className="hidden md:flex items-center justify-between h-16">
           <div className="flex items-center">
             <img
               src="/images/shopee-express-logo.png"
@@ -890,7 +920,10 @@ const VehicleTable = ({
                   {vehicle.license_plate}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  {vehicle.planned_vehicle}
+                  <VehicleTypeChip
+                    vehicleType={vehicle.planned_vehicle}
+                    language={language}
+                  />
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                   {vehicle.eta_destination_scheduled || "-"}
