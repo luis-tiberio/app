@@ -341,7 +341,7 @@ const Header = ({ language, setLanguage, warehouseCode }) => {
 
   return (
     <div className="bg-white shadow">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 max-w-full">
         {/* Mobile Layout */}
         <div className="md:hidden">
           <div className="flex items-center justify-between h-16">
@@ -1254,7 +1254,7 @@ const Dashboard = () => {
         warehouseCode={warehouseCode}
       />
       <main>
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto py-6 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 max-w-full">
           <DashboardStats counts={counts} language={language} />
 
           <div className="px-4 py-6 sm:px-0">
