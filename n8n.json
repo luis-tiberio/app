@@ -19,7 +19,7 @@
         840
       ],
       "parameters": {
-        "url": "=https://queue.fal.run/fal-ai/veo3/requests/{{ $('Create Video').item.json.request_id }}/status ",
+        "url": "=https://queue.fal.run/fal-ai/veo3/requests/{{ $('Create Video').item.json.request_id }}/status",
         "options": {},
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth"
@@ -40,7 +40,6 @@
         1080,
         840
       ],
-      "webhookId": "490facb8-d0ae-402e-ab59-a87720cf0bdd",
       "parameters": {
         "amount": 60
       },
@@ -77,7 +76,7 @@
         "color": 3,
         "width": 740,
         "height": 280,
-        "content": "# Generate AI Videos with Google Veo3, Save to Google Drive and Upload to YouTube\n\nThis workflow allows users to **generate AI videos** using **Google Veo3**, save them to **Google Drive**, generate optimized YouTube titles with GPT-4o, and **automatically upload them to YouTube**. The entire process is triggered from a Google Sheet that acts as the central interface for input and output.\n\nIT automates video creation, uploading, and tracking, ensuring seamless integration between Google Sheets, Google Drive, Google Veo3, and YouTube.\n\n\n\n\n"
+        "content": "# Generate AI Videos with Google Veo3, Save to Google Drive and Upload to YouTube\n\nThis workflow allows users to **generate AI videos** using **Google Veo3**, save them to **Google Drive**, generate optimized YouTube titles with GPT-4o, and **automatically upload them to YouTube**. The entire process is triggered from a Google Sheet that acts as the central interface for input and output.\n\nIT automates video creation, uploading, and tracking, ensuring seamless integration between Google Sheets, Google Drive, Google Veo3, and YouTube."
       },
       "typeVersion": 1
     },
@@ -256,7 +255,9 @@
         840
       ],
       "parameters": {
-        "options": {},
+        "options": {
+          "limit": 1
+        },
         "filtersUI": {
           "values":
         },
@@ -345,7 +346,11 @@
       ],
       "parameters": {
         "url": "={{ $('Get Url Video').item.json.video.url }}",
-        "options": {}
+        "options": {
+          "response": {
+            "response": "file"
+          }
+        }
       },
       "typeVersion": 4.2
     },
@@ -493,7 +498,7 @@
       "parameters": {
         "width": 740,
         "height": 200,
-        "content": "## STEP 3 - Upload video on Youtube\n- Find your API key in your [Upload-Post Manage Api Keys](https://app.upload-post.com/) 10 FREE uploads per month\n- Set the the \"Auth Header\":\n-- Name: Authorization\n-- Value: Apikey YOUR_API_KEY_HERE\n- Create profiles to manage your social media accounts. The \"Profile\" you choose will be used in the field YOUR_USRNAME (eg. test1 or test2).  "
+        "content": "## STEP 3 - Upload video on Youtube\n- Find your API key in your [Upload-Post Manage Api Keys](https://app.upload-post.com/) 10 FREE uploads per month\n- Set the the \"Auth Header\":\n-- Name: Authorization\n-- Value: Apikey YOUR_API_KEY_HERE\n- Create profiles to manage your social media accounts. The \"Profile\" you choose will be used in the field YOUR_USRNAME (eg. test1 or test2).  "
       },
       "typeVersion": 1
     },
@@ -518,7 +523,7 @@
           }
         },
         "messages": {
-          "values":...\",\n  \"youtube_titles\":,\n  \"youtube_description\": \"I still can't explain what I saw that night in the woods. Subscribe for more unsettling stories.\\n\\nFollow me:\\n\",\n  \"youtube_tags\": \"horror stories, scary stories, creepy, horror, unsettling, reddit horror stories, dr void, mr nightmares\",\n  \"thumbnail_prompt\": \"Cinematic, photorealistic, dark horror movie poster. A single, mysterious, dark figure with glowing eyes stands at the end of a long, dark hallway. High contrast, deep shadows, minimalist, unsettling. No text.\"\n}"
+          "values":,\n  \"youtube_description\": \"A complete, SEO-optimized YouTube description including a hook and hashtags.\",\n  \"youtube_tags\": \"A comma-separated string of 15-20 relevant keywords.\",\n  \"thumbnail_prompt\": \"A detailed prompt for an AI image generator to create a high-contrast, clickable thumbnail.\"\n}\n\n--- MASTER PROMPT INSTRUCTIONS ---\n\n### 1. VIDEO_PROMPT\n**Script:**\n- **Length:** 1700-2500 words.\n- **Style:** First-person, calm, eerie, suspenseful. The narrator is recounting an unsettling memory.\n- **Structure:**\n    1.  **Hook (First 30 seconds):** Start immediately with an unsettling event or question. No long intros.\n    2.  **Body:** Build the story chronologically with a focus on sensory details. Build tension slowly.\n    3.  **Climax:** The peak of the story.\n    4.  **Outro:** Conclude the story, but leave a lingering sense of dread.\n    5.  **CTA:** A simple call to action after the story.\n**Visual Direction:**\n- Describe a single, high-resolution, atmospheric image that will be the only visual. It should be subtly animated (e.g., slow zoom, dust particles). Provide a detailed prompt for an AI image generator.\n\n### 2. YOUTUBE_TITLES\n- **Formula:** Start with an unsettling adjective (e.g., \"Creepy,\" \"Disturbing\"). Use title case. Keep it concise and mysterious.\n\n### 3. YOUTUBE_DESCRIPTION\n- **Structure:**\n    1.  A 1-2 sentence hook.\n    2.  A call-to-action to subscribe.\n    3.  Placeholders for social links.\n    4.  A section with relevant hashtags.\n\n### 4. YOUTUBE_TAGS\n- **Method:** Combine broad, specific, and long-tail keywords. Include channel-related tags like 'dr void', 'mr nightmares'.\n\n### 5. THUMBNAIL_PROMPT\n- **Style:** Cinematic, photorealistic, dark horror movie poster. High contrast, deep shadows, minimalist, unsettling. No text."
             },
             {
               "content": "=Core Topic: {{ $('Get new video').item.json.PROMPT }}"
